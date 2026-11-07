@@ -1,0 +1,4 @@
+.goal/
+!.goal/*/GOAL.md
+graphify-out/cache/
+node_modules/
