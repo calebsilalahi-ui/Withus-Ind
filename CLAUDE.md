@@ -27,3 +27,6 @@ A graph of all WithUs context, CLAUDE.md files, commands and skills is stored in
 `graphify query "<question>" --graph .claude/graph/graph.json`
 Rebuild/update: `bash scripts/build-global-graph.sh`, then `/graphify ~/.claude/graph-corpus --update`, then `bash scripts/build-global-graph.sh finish` (embeds the HTML library so graph.html is not blank in previews).
 Note: 70 of 115 source files were only skimmed by extraction agents (listed in `.claude/graph/.graphify_partial.txt`); `--update` re-reads them.
+
+## Private WithUs document graph (local only)
+Confidential WithUs documents (folder "PT Harpa Ananta Sora") are graphed on Martha's Mac with `scripts/local/graph-withus-folder.sh`. The graph stays local and must never be committed. It covers WithUs Indonesia only; Smashing (burger) gets its own separate graph.
