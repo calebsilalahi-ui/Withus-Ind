@@ -25,5 +25,5 @@ CodeRabbit review runs via the CodeRabbit GitHub App on pull requests (no CLI ne
 ## Global knowledge graph
 A graph of all WithUs context, CLAUDE.md files, commands and skills is stored in `.claude/graph/` (`graph.json`, `GRAPH_REPORT.md`, `graph.html`; 384 nodes, 23 communities). Query it before reading skills one by one:
 `graphify query "<question>" --graph .claude/graph/graph.json`
-Rebuild/update: `bash scripts/build-global-graph.sh` then `/graphify ~/.claude/graph-corpus --update`.
+Rebuild/update: `bash scripts/build-global-graph.sh`, then `/graphify ~/.claude/graph-corpus --update`, then `bash scripts/build-global-graph.sh finish` (embeds the HTML library so graph.html is not blank in previews).
 Note: 70 of 115 source files were only skimmed by extraction agents (listed in `.claude/graph/.graphify_partial.txt`); `--update` re-reads them.
