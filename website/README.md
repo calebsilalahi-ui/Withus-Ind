@@ -4,10 +4,11 @@ HTML/CSS/JS statis, tanpa build step. Salin folder `website/` ke situs yang ada 
 Uji lokal: `cd website && python3 -m http.server 8000`.
 
 ## Warna
-Hanya oranye `#F47527`, hitam, putih (token di `:root` pada `assets/css/style.css`).
+Oranye `#F47527`, hitam, putih, plus percikan kecil biru royal `#4169E1` (`--royal`, token di `:root` pada `assets/css/style.css`). Latar semua halaman: gradien oranye beranimasi + percikan biru (pseudo-element `body::before/::after`; mati otomatis saat reduced-motion).
 
 ## Struktur
 - `index.html`, `promoter-101.html`, `about.html`, `services.html`, `contact.html`, `privacy-policy.html`, `terms.html`
+- Bagian event di Home pas satu layar desktop: kartu datar (satu elemen per poster, tanpa irisan), semua kartu bisa diklik, panah di sisi kiri/kanan, tombol "See event" menempel di bawah layar (fixed) selama bagian event terlihat
 - Event tampil sebagai jendela (modal) di Home, tanpa halaman terpisah. Link langsung: `index.html#event-<slug>`; tombol Back/Esc menutup jendela
 - `assets/js/events.js`: SATU-SATUNYA sumber data event (carousel + jendela event)
 - `assets/js/main.js`: header/footer (satu sumber), animasi GSAP, carousel, lightbox, toggle bahasa

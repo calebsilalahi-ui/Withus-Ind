@@ -113,28 +113,28 @@
   /* ---------- ring 3D: kartu melengkung di silinder, drag berinersia, snap, klik untuk fokus ---------- */
   var ringWrap = $("#ring");
   function initRing() {
-    var ev = EVENTS, slots = [], reps = Math.max(1, Math.ceil(6 / ev.length));
+    var ev = EVENTS, slots = [], reps = Math.max(1, Math.ceil(9 / ev.length));
     for (var r = 0; r < reps; r++) ev.forEach(function (e) { slots.push(e); });
     var n = slots.length, step = 360 / n, K = 14, fill = .86, phi = step * fill;
-    var ringEl = $(".ring", ringWrap), tilt = $(".ring-tilt", ringWrap);
+    var ringEl = $(".ring", ringWrap);
     var imgs = {}, cards = [], cw, ch, R, theta = 0, vel = 0, target = null, dragging = false, active = -1, last = 0;
 
     function norm(a) { a = ((a + 180) % 360 + 360) % 360 - 180; return a; }
     function build() {
-      var w = ringWrap.clientWidth;
-      cw = Math.round(Math.min(w * (w < 600 ? .6 : .36), 440)); ch = Math.round(cw * 4 / 3);
+      if (active < 0) { active = 0; caption(); }               // isi keterangan dulu agar tinggi ruang kartu akurat
+      var w = ringWrap.clientWidth, hh = ringWrap.clientHeight;
+      cw = Math.min(w * (w < 600 ? .6 : .36), 440); ch = cw * 4 / 3;
+      var maxH = Math.max(220, hh - 28);                    // kartu muat di satu layar
+      if (ch > maxH) { ch = maxH; cw = ch * 3 / 4; }
+      cw = Math.round(cw); ch = Math.round(ch);
       R = Math.round(cw / (phi * Math.PI / 180));
-      ringWrap.style.height = Math.round(ch + 90) + "px";
-      var sw = cw / K; ringEl.innerHTML = ""; cards = [];
+      ringEl.innerHTML = ""; cards = [];
       slots.forEach(function (e, i) {
-        var im = imgs[e.poster], nw = im.naturalWidth || 600, nh = im.naturalHeight || 800, sc = Math.max(cw / nw, ch / nh), dw = nw * sc, dh = nh * sc;
-        var card = doc.createElement("div"); card.className = "rc"; card.dataset.i = i; var sl = [];
-        for (var j = 0; j < K; j++) {
-          var a = i * step + (j / (K - 1) - .5) * phi, d = doc.createElement("div"); d.className = "sl";
-          d.style.cssText = "width:" + (sw + 3) + "px;height:" + ch + "px;left:" + (-sw / 2) + "px;top:" + (-ch / 2) + "px;background-image:url(" + e.poster + ");background-size:" + dw + "px " + dh + "px;background-position:" + ((cw - dw) / 2 - j * sw) + "px " + ((ch - dh) / 2) + "px;transform:rotateY(" + a.toFixed(3) + "deg) translateZ(" + R + "px)";
-          card.appendChild(d); sl.push(d);
-        }
-        ringEl.appendChild(card); cards.push({ el: card, sl: sl, f: "" });
+        var a = i * step, card = doc.createElement("a");     // satu kartu datar: tanpa irisan, tanpa garis
+        card.className = "rc"; card.dataset.i = i; card.href = "#event-" + e.slug; card.tabIndex = -1; card.draggable = false;
+        card.setAttribute("aria-label", e.name.replace(/\[[^\]]*\]/g, "").trim());
+        card.style.cssText = "width:" + cw + "px;height:" + ch + "px;left:" + (-cw / 2) + "px;top:" + (-ch / 2) + "px;background-image:url(" + e.poster + ");transform:rotateY(" + a.toFixed(3) + "deg) translateZ(" + R + "px)";
+        ringEl.appendChild(card); cards.push({ el: card, f: "" });
       });
       render(true);
     }
@@ -145,10 +145,10 @@
         var f = ang > 105 ? "hide" : "blur(" + (t * 5).toFixed(1) + "px) brightness(" + (1 - t * .5).toFixed(2) + ")";
         if (f === c.f && !force) return; c.f = f;
         c.el.style.visibility = f === "hide" ? "hidden" : "visible";
-        if (f !== "hide") c.sl.forEach(function (s) { s.style.filter = f; });
+        if (f !== "hide") c.el.style.filter = f;
       });
       var idx = ((Math.round(-theta / step) % n) + n) % n;
-      if (idx !== active) { active = idx; caption(); }
+      if (idx !== active || force) { active = idx; caption(); cards.forEach(function (c, i) { c.el.classList.toggle("is-active", i === idx); }); }
     }
     function caption() {
       var e = slots[active], k = ev.indexOf(e);
@@ -178,16 +178,18 @@
     window.addEventListener("pointerup", function (e) {
       if (!down) return; down = false;
       if (moved) { dragging = false; ringWrap.classList.remove("drag"); if (reduce) { go(Math.round((theta + Math.max(-step * 1.4, Math.min(step * 1.4, vel * 5))) / step) * step); } else if (!raf) raf = requestAnimationFrame(loop); setTimeout(function () { moved = false; }, 50); }
-      else { var c = e.target.closest && e.target.closest(".rc"); if (c) { var i = +c.dataset.i; if (i === active) openEvent(slots[i].slug, true); else focusIndex(i); } }
+    });
+    // semua kartu bisa diklik: buka event itu langsung (drag tidak dihitung klik)
+    ringWrap.addEventListener("click", function (e) {
+      var c = e.target.closest && e.target.closest(".rc"); if (!c) return;
+      e.preventDefault(); if (moved) return;
+      var i = +c.dataset.i; focusIndex(i); openEvent(slots[i].slug, true);
     });
     $("#rc-prev").onclick = function () { focusIndex(active - 1); }; $("#rc-next").onclick = function () { focusIndex(active + 1); };
     $("#rc-open").onclick = function () { openEvent(slots[active].slug, true); };
     ringWrap.addEventListener("keydown", function (e) {
       if (e.key === "ArrowRight") { e.preventDefault(); focusIndex(active + 1); } else if (e.key === "ArrowLeft") { e.preventDefault(); focusIndex(active - 1); } else if (e.key === "Enter") { e.preventDefault(); openEvent(slots[active].slug, true); }
     });
-    // parallax: ring condong mengikuti kursor
-    if (!reduce) ringWrap.addEventListener("pointermove", function (e) { if (e.pointerType !== "mouse" || down) return; var r = ringWrap.getBoundingClientRect(); tilt.style.transform = "rotateX(" + (((e.clientY - r.top) / r.height - .5) * -8).toFixed(2) + "deg)"; });
-    ringWrap.addEventListener("pointerleave", function () { tilt.style.transform = ""; });
     var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(build, 150); });
     // preload (loading state), lalu bangun
     var urls = []; ev.forEach(function (e) { if (urls.indexOf(e.poster) < 0) urls.push(e.poster); });
@@ -289,6 +291,11 @@
     function show(k) { $$(".form-msg", form).forEach(function (m) { m.className = "form-msg" + (m.dataset.k === k ? " " + k : ""); }); }
   });
 
+  var dock = $("#ev-dock"), evSec = $("#events");
+  if (dock && evSec) {
+    if ("IntersectionObserver" in window) new IntersectionObserver(function (en) { dock.classList.toggle("on", en[0].isIntersecting); }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 }).observe(evSec);
+    else dock.classList.add("on");
+  }
   if (ringWrap && window.EVENTS) initRing();
   syncHash(); initScroll();
   window.addEventListener("load", function () { if (window.ScrollTrigger) ScrollTrigger.refresh(); });
