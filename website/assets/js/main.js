@@ -124,7 +124,7 @@
       if (active < 0) { active = 0; caption(); }               // isi keterangan dulu agar tinggi ruang kartu akurat
       var w = ringWrap.clientWidth, hh = ringWrap.clientHeight;
       cw = Math.min(w * (w < 600 ? .6 : .36), 440); ch = cw * 4 / 3;
-      var maxH = Math.max(220, hh - 28);                    // kartu muat di satu layar
+      var maxH = Math.max(220, hh - 72);                    // sisakan ruang agar cahaya kartu tidak terpotong                    // kartu muat di satu layar
       if (ch > maxH) { ch = maxH; cw = ch * 3 / 4; }
       cw = Math.round(cw); ch = Math.round(ch);
       R = Math.round(cw / (phi * Math.PI / 180));
