@@ -3,8 +3,7 @@
   "use strict";
   var doc = document, root = doc.documentElement;
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var inEvents = /\/events\//.test(location.pathname);
-  var base = inEvents ? "../" : "";
+  var base = "";
   function $(s, c) { return (c || doc).querySelector(s); }
   function $$(s, c) { return Array.prototype.slice.call((c || doc).querySelectorAll(s)); }
   function lang() { return root.getAttribute("data-lang") || "en"; }
@@ -91,111 +90,120 @@
       if (el.dataset.done) return; el.dataset.done = 1;
       gsap.to(el, { opacity: 1, y: 0, duration: .9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 88%", once: true } });
     });
+    $$(".scrub p").forEach(function (p) {
+      if (p.dataset.done) return; p.dataset.done = 1;
+      p.innerHTML = p.textContent.split(/\s+/).map(function (w) { return "<span>" + esc(w) + "</span>"; }).join(" ");
+      gsap.fromTo($$("span", p), { opacity: .15 }, { opacity: 1, stagger: .1, ease: "none", scrollTrigger: { trigger: p, start: "top 85%", end: "bottom 55%", scrub: true } });
+    });
     $$("[data-count]").forEach(function (el) {
       var to = parseFloat(el.dataset.count), o = { v: 0 };
       gsap.to(o, { v: to, duration: 1.8, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 90%", once: true }, onUpdate: function () { el.textContent = Math.round(o.v) + (el.dataset.suffix || ""); } });
     });
   }
 
-  /* ---------- carousel ---------- */
+  /* ---------- carousel (geser: swipe, drag, trackpad, panah, keyboard, dots) ---------- */
   var track = $("#event-track");
   function cardHTML(e) {
-    return '<a class="ecard" href="events/' + e.slug + '.html" data-slug="' + e.slug + '" style="--accent:' + e.accent + '"><span class="glass"></span>' +
-      '<img src="' + e.poster + '" alt="' + esc(e.name) + ' poster" loading="lazy" width="600" height="800">' +
+    return '<a class="ecard" href="#event-' + e.slug + '" data-slug="' + e.slug + '" aria-label="' + esc(e.name) + '"><span class="glass"></span>' +
+      '<img src="' + e.poster + '" alt="' + esc(e.name) + ' poster" loading="lazy" width="600" height="800" draggable="false">' +
       '<div class="meta"><span class="tag">' + (e.status === "upcoming" ? bi("Upcoming", "Mendatang") : bi("Past event", "Event lalu")) + "</span>" +
-      "<h3>" + mark(e.name) + '</h3><p class="sub">' + mark(e.date) + " · " + mark(e.venue) + ", " + esc(e.city) + "</p></div></a>";
+      "<h3>" + mark(e.name) + '</h3><p class="sub">' + mark(e.date) + " · " + mark(e.venue) + "</p></div></a>";
   }
   function initCarousel() {
-    var cards = $$(".ecard", track);
+    var cards = $$(".ecard", track), dotsBox = $("#car-dots"), idx = 0, dots = [];
+    dotsBox.innerHTML = cards.map(function (c, i) { return '<button aria-label="Event ' + (i + 1) + '"></button>'; }).join("");
+    dots = $$("button", dotsBox);
+    function centerOf(el) { return el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2; }
+    function goTo(i, instant) { i = Math.max(0, Math.min(cards.length - 1, i)); track.scrollTo({ left: centerOf(cards[i]), behavior: instant || reduce ? "auto" : "smooth" }); }
     function update() {
-      var c = track.getBoundingClientRect(), mid = c.left + c.width / 2;
-      cards.forEach(function (el) {
-        var r = el.getBoundingClientRect(), d = Math.min(1, Math.abs(r.left + r.width / 2 - mid) / (c.width / 2));
-        el.style.transform = "scale(" + (1 - d * .12).toFixed(3) + ")"; el.style.opacity = (1 - d * .45).toFixed(2);
-        el.dataset.d = d;
+      var mid = track.scrollLeft + track.clientWidth / 2, best = 1e9;
+      cards.forEach(function (el, i) {
+        var off = el.offsetLeft + el.offsetWidth / 2 - mid, d = Math.abs(off), n = Math.min(1, d / (track.clientWidth / 2));
+        el.style.transform = "scale(" + (1 - n * .14).toFixed(3) + ") rotateY(" + ((off / track.clientWidth) * -14).toFixed(1) + "deg)";
+        el.style.opacity = (1 - n * .55).toFixed(2);
+        if (d < best) { best = d; idx = i; }
       });
+      dots.forEach(function (d, i) { d.setAttribute("aria-current", i === idx); });
     }
     var tick; track.addEventListener("scroll", function () { cancelAnimationFrame(tick); tick = requestAnimationFrame(update); }, { passive: true });
-    update(); window.addEventListener("resize", update);
-    function step(dir) { var w = cards[0].getBoundingClientRect().width + 28; track.scrollBy({ left: dir * w, behavior: reduce ? "auto" : "smooth" }); }
-    $("#car-prev").addEventListener("click", function () { step(-1); });
-    $("#car-next").addEventListener("click", function () { step(1); });
-    track.addEventListener("keydown", function (e) { if (e.key === "ArrowRight") { e.preventDefault(); step(1); } if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); } });
-    // drag mouse
-    var down = false, sx = 0, sl = 0, moved = false;
-    track.addEventListener("pointerdown", function (e) { if (e.pointerType !== "mouse") return; down = true; moved = false; sx = e.clientX; sl = track.scrollLeft; });
-    window.addEventListener("pointermove", function (e) { if (!down) return; var dx = e.clientX - sx; if (Math.abs(dx) > 5) { moved = true; track.classList.add("drag"); } if (moved) track.scrollLeft = sl - dx; });
-    window.addEventListener("pointerup", function () { if (!down) return; down = false; track.classList.remove("drag"); });
-    track.addEventListener("click", function (e) { if (moved) { e.preventDefault(); moved = false; } }, true);
-    // glare + tilt, nama view-transition untuk transisi kartu -> hero
+    dots.forEach(function (d, i) { d.addEventListener("click", function () { goTo(i); }); });
+    $("#car-prev").onclick = function () { goTo(idx - 1); }; $("#car-next").onclick = function () { goTo(idx + 1); };
+    track.addEventListener("keydown", function (e) { if (e.key === "ArrowRight") { e.preventDefault(); goTo(idx + 1); } if (e.key === "ArrowLeft") { e.preventDefault(); goTo(idx - 1); } });
+    // drag mouse dengan inersia ringan; sentuhan memakai scroll native
+    var down = false, sx = 0, sl = 0, moved = false, lastX = 0, vx = 0;
+    track.addEventListener("pointerdown", function (e) { if (e.pointerType !== "mouse") return; down = true; moved = false; sx = lastX = e.clientX; sl = track.scrollLeft; vx = 0; });
+    window.addEventListener("pointermove", function (e) { if (!down) return; var dx = e.clientX - sx; vx = e.clientX - lastX; lastX = e.clientX; if (Math.abs(dx) > 6) { moved = true; track.classList.add("drag"); } if (moved) track.scrollLeft = sl - dx; });
+    window.addEventListener("pointerup", function () {
+      if (!down) return; down = false;
+      if (moved) { var target = idx + (vx < -6 ? 1 : vx > 6 ? -1 : 0); track.classList.remove("drag"); goTo(target); setTimeout(function () { moved = false; }, 60); }
+    });
+    track.addEventListener("click", function (e) { if (moved) { e.preventDefault(); e.stopPropagation(); } }, true);
     cards.forEach(function (el) {
       el.addEventListener("pointermove", function (e) {
-        if (e.pointerType !== "mouse") return;
-        var r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-        el.style.setProperty("--mx", x * 100 + "%"); el.style.setProperty("--my", y * 100 + "%");
-        if (!reduce) { var s = el.style.transform.replace(/ ?rotate[XY]\([^)]*\)/g, ""); el.style.transform = s + " rotateY(" + ((x - .5) * 10).toFixed(1) + "deg) rotateX(" + ((.5 - y) * 8).toFixed(1) + "deg)"; }
+        if (e.pointerType !== "mouse" || down) return;
+        var r = el.getBoundingClientRect(); el.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%"); el.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
       });
-      el.addEventListener("pointerleave", function () { update(); });
-      el.addEventListener("click", function () { var img = $("img", el); if (img) img.style.viewTransitionName = "ev-hero"; });
+      el.addEventListener("click", function (e) { e.preventDefault(); if (!moved) openEvent(el.dataset.slug, true); });
     });
+    window.addEventListener("resize", update); goTo(0, true); update();
   }
-  function renderDynamic() { if (track && window.EVENTS) { track.innerHTML = EVENTS.map(cardHTML).join(""); initCarousel(); } renderEventPage(); }
 
-  /* ---------- halaman event ---------- */
-  function renderEventPage() {
-    var host = $("[data-event]"); if (!host || !window.EVENTS) return;
-    var i = EVENTS.findIndex(function (e) { return e.slug === host.dataset.event; }); if (i < 0) return;
-    var e = EVENTS[i], prev = EVENTS[(i + EVENTS.length - 1) % EVENTS.length], next = EVENTS[(i + 1) % EVENTS.length];
-    host.style.setProperty("--accent", e.accent);
-    var A = "../";
-    host.innerHTML =
-      '<section class="ev-hero"><div class="bg"><img src="' + A + e.heroImage + '" alt="" ></div><div class="wrap"><div>' +
-      '<p class="eyebrow">' + (e.status === "upcoming" ? bi("Upcoming event", "Event mendatang") : bi("Past event", "Event lalu")) + "</p><h1>" + mark(e.name) + "</h1>" +
-      '<div class="ev-facts"><div><b>' + bi("Date", "Tanggal") + "</b>" + mark(e.date) + "</div><div><b>Venue</b>" + mark(e.venue) + "</div><div><b>" + bi("City", "Kota") + "</b>" + esc(e.city) + "</div></div>" +
-      (e.ticketUrl ? '<div class="btns"><a class="btn primary" href="' + esc(e.ticketUrl) + '" rel="noopener" target="_blank">' + bi("Get Tickets (official)", "Beli Tiket (resmi)") + "</a></div>" : "") +
-      '</div><img class="poster" style="view-transition-name:ev-hero" src="' + A + e.poster + '" alt="' + esc(e.name) + ' poster" width="600" height="800"></div></section>' +
-      '<section><div class="wrap"><p class="eyebrow">' + bi("Overview", "Ringkasan") + '</p><p class="lead" data-reveal>' + mark(tr(e.summary)) + "</p></div></section>" +
-      '<section class="story"><div class="wrap"><p class="eyebrow">' + bi("How it happened", "Bagaimana ini terjadi") + '</p><h2>' + bi("From announcement to aftermath", "Dari pengumuman hingga pasca-event") + '</h2></div>' +
-      '<div class="wrap story-grid"><div class="story-sticky"><div class="story-img">' + e.story.map(function (s, k) { return '<img class="' + (k ? "" : "on") + '" src="' + A + s.image + '" alt="' + esc(s.phase) + ' — ' + esc(e.name) + '" loading="lazy">'; }).join("") + '</div></div>' +
-      '<div class="story-steps">' + e.story.map(function (s, k) { return '<article class="step' + (k ? "" : " on") + '"><p class="ph">0' + (k + 1) + " · " + esc(s.phase) + "</p><h3>" + mark(tr(s.title)) + "</h3><p class=\"muted\">" + mark(tr(s.body)) + "</p></article>"; }).join("") + "</div></div></section>" +
-      '<section><div class="wrap"><p class="eyebrow">' + bi("By the numbers", "Dalam angka") + '</p><div class="stats">' + e.stats.map(function (s) {
-        var n = /^\d+$/.test(s.value); return '<div class="stat glass" data-reveal><b' + (n ? ' data-count="' + s.value + '"' : "") + ">" + mark(s.value) + "</b><span>" + esc(tr(s.label)) + "</span></div>"; }).join("") + "</div></div></section>" +
-      '<section><div class="wrap"><p class="eyebrow">Posters</p><div class="strip">' + e.posters.map(function (p) { return '<img src="' + A + p + '" alt="' + esc(e.name) + ' poster" loading="lazy" width="450" height="600">'; }).join("") + "</div></div></section>" +
-      '<section><div class="wrap"><p class="eyebrow">' + bi("Gallery", "Galeri") + '</p><div class="filters" role="group" aria-label="Filter"><button data-f="all" aria-pressed="true">' + bi("All", "Semua") + '</button><button data-f="artist" aria-pressed="false">Artist</button><button data-f="crowd" aria-pressed="false">Crowd</button></div>' +
-      '<div class="masonry">' + e.gallery.map(function (g, k) { return '<button data-type="' + g.type + '" data-k="' + k + '" aria-label="' + esc(g.alt) + '"><img src="' + A + g.src + '" alt="' + esc(g.alt) + '" loading="lazy"></button>'; }).join("") + "</div></div></section>" +
-      (e.partners.length ? '<section><div class="wrap"><p class="eyebrow">' + bi("Partners", "Mitra") + "</p><p>" + e.partners.map(esc).join(" · ") + "</p></div></section>" : "") +
-      '<section><div class="wrap ev-nav"><a class="glass" href="' + prev.slug + '.html"><small>' + bi("Previous", "Sebelumnya") + "</small><strong>" + mark(prev.name) + '</strong></a><a class="glass" href="' + next.slug + '.html"><small>' + bi("Next", "Berikutnya") + "</small><strong>" + mark(next.name) + "</strong></a></div>" +
-      '<div class="wrap btns" style="justify-content:center"><a class="btn primary" href="../contact.html">' + bi("Work With Us", "Bekerja Sama") + "</a></div></section>" +
-      '<div class="lightbox" role="dialog" aria-modal="true" aria-label="Gallery"><button class="lb-x" aria-label="Close">✕</button><button class="lb-p" aria-label="Previous">‹</button><img alt=""><button class="lb-n" aria-label="Next">›</button></div>';
-    doc.title = doc.title; // judul statis; lihat README untuk SEO per event
-    initStory(host); initGallery(host, e); initScroll();
-  }
-  function initStory(host) {
-    var steps = $$(".step", host), imgs = $$(".story-img img", host);
-    function on(k) { steps.forEach(function (s, j) { s.classList.toggle("on", j === k); }); imgs.forEach(function (im, j) { im.classList.toggle("on", j === k); }); }
-    if ("IntersectionObserver" in window) {
-      var io = new IntersectionObserver(function (en) { en.forEach(function (x) { if (x.isIntersecting) on(steps.indexOf(x.target)); }); }, { rootMargin: "-45% 0px -45% 0px" });
-      steps.forEach(function (s) { io.observe(s); });
-    }
-  }
-  function initGallery(host, e) {
-    var btns = $$(".masonry button", host), lb = $(".lightbox", host), li = $("img", lb), cur = 0, vis = [];
-    $$(".filters button", host).forEach(function (b) {
-      b.addEventListener("click", function () {
-        $$(".filters button", host).forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
-        btns.forEach(function (g) { g.style.display = b.dataset.f === "all" || g.dataset.type === b.dataset.f ? "" : "none"; });
-      });
+  /* ---------- jendela event (modal): tanpa pindah halaman, tombol Back menutup ---------- */
+  var modal = null, openSlug = null, lastFocus = null;
+  function ensureModal() {
+    if (modal) return modal;
+    modal = doc.createElement("div"); modal.className = "modal"; modal.hidden = true; modal.setAttribute("role", "dialog"); modal.setAttribute("aria-modal", "true");
+    modal.innerHTML = '<div class="modal-bg"></div><div class="modal-card"><button class="modal-x" aria-label="Close">✕</button><div class="modal-body"></div></div>';
+    doc.body.appendChild(modal);
+    modal.addEventListener("click", function (e) {
+      if (e.target.classList.contains("modal-bg") || e.target.closest(".modal-x")) closeEvent();
+      var nav = e.target.closest("[data-go]"); if (nav) openEvent(nav.dataset.go, false, true);
     });
-    function show(k) { vis = btns.filter(function (g) { return g.style.display !== "none"; }); cur = (k + vis.length) % vis.length; var g = e.gallery[+vis[cur].dataset.k]; li.src = "../" + g.src; li.alt = g.alt; }
-    var opener;
-    btns.forEach(function (g) { g.addEventListener("click", function () { opener = g; vis = btns.filter(function (x) { return x.style.display !== "none"; }); show(vis.indexOf(g)); lb.classList.add("open"); $(".lb-x", lb).focus(); }); });
-    function close() { lb.classList.remove("open"); if (opener) opener.focus(); }
-    $(".lb-x", lb).onclick = close; $(".lb-p", lb).onclick = function () { show(cur - 1); }; $(".lb-n", lb).onclick = function () { show(cur + 1); };
-    lb.addEventListener("click", function (ev) { if (ev.target === lb) close(); });
-    doc.addEventListener("keydown", function (ev) { if (!lb.classList.contains("open")) return; if (ev.key === "Escape") close(); if (ev.key === "ArrowLeft") show(cur - 1); if (ev.key === "ArrowRight") show(cur + 1); });
-    var tx = 0; lb.addEventListener("touchstart", function (ev) { tx = ev.touches[0].clientX; }, { passive: true });
-    lb.addEventListener("touchend", function (ev) { var d = ev.changedTouches[0].clientX - tx; if (Math.abs(d) > 50) show(cur + (d < 0 ? 1 : -1)); });
+    doc.addEventListener("keydown", function (e) {
+      if (modal.hidden) return;
+      if (e.key === "Escape") closeEvent();
+      if (e.key === "Tab") {
+        var f = $$("button,a[href]", modal).filter(function (x) { return x.offsetParent; }); if (!f.length) return;
+        var a = f[0], z = f[f.length - 1];
+        if (e.shiftKey && doc.activeElement === a) { e.preventDefault(); z.focus(); } else if (!e.shiftKey && doc.activeElement === z) { e.preventDefault(); a.focus(); }
+      }
+    });
+    return modal;
   }
+  function eventHTML(e, i) {
+    var prev = EVENTS[(i + EVENTS.length - 1) % EVENTS.length], next = EVENTS[(i + 1) % EVENTS.length];
+    return '<div class="m-grid"><div class="m-poster"><img src="' + e.poster + '" alt="' + esc(e.name) + ' poster" width="600" height="800"></div><div class="m-info">' +
+      '<p class="eyebrow">' + (e.status === "upcoming" ? bi("Upcoming event", "Event mendatang") : bi("Past event", "Event lalu")) + '</p><h2 id="m-title">' + mark(e.name) + "</h2>" +
+      (e.subtitle ? '<p class="lead" style="margin-top:.6rem">' + mark(e.subtitle) + "</p>" : "") +
+      '<dl class="ev-facts"><div><dt>' + bi("Date", "Tanggal") + "</dt><dd>" + mark(e.date) + "</dd></div><div><dt>Venue</dt><dd>" + mark(e.venue) + "</dd></div><div><dt>" + bi("City", "Kota") + "</dt><dd>" + esc(e.city) + "</dd></div></dl>" +
+      (e.ticketUrl ? '<div class="btns"><a class="btn primary" href="' + esc(e.ticketUrl) + '" rel="noopener" target="_blank">' + bi("Get Tickets (official)", "Beli Tiket (resmi)") + "</a></div>" : "") +
+      '<p class="muted m-sum">' + mark(tr(e.summary)) + "</p>" +
+      (e.partners.length ? '<p class="m-partners"><b>' + bi("Credits", "Kredit") + "</b> " + e.partners.map(esc).join(" · ") + "</p>" : "") + "</div></div>" +
+      '<h3 class="m-h">' + bi("How it happened", "Bagaimana ini terjadi") + '</h3>' + (!e.story.some(function (s) { return tr(s.title) !== "[ISI]" || tr(s.body) !== "[ISI]"; }) ? '<p class="muted">' + mark("[ISI: cerita per fase: Announcement, Ticketing, Production, Show Day, Aftermath]") + "</p>" : '<ol class="m-story">' +
+      e.story.map(function (s) { return '<li><span class="ph">' + esc(s.phase) + "</span><b>" + mark(tr(s.title)) + '</b><span class="muted">' + mark(tr(s.body)) + "</span></li>"; }).join("") + "</ol>") +
+      '<h3 class="m-h">' + bi("By the numbers", "Dalam angka") + '</h3><div class="stats">' + e.stats.map(function (s) { return '<div class="stat glass"><b>' + mark(s.value) + "</b><span>" + esc(tr(s.label)) + "</span></div>"; }).join("") + "</div>" +
+      '<h3 class="m-h">' + bi("Gallery", "Galeri") + '</h3><div class="strip">' + e.gallery.map(function (g) { return '<img src="' + g.src + '" alt="' + esc(g.alt) + '" loading="lazy" width="450" height="600">'; }).join("") + "</div>" +
+      '<div class="m-nav"><button class="btn" data-go="' + prev.slug + '">← ' + mark(prev.name) + '</button><button class="btn" data-go="' + next.slug + '">' + mark(next.name) + " →</button></div>";
+  }
+  function renderModal() {
+    var i = EVENTS.findIndex(function (e) { return e.slug === openSlug; }); if (i < 0) return;
+    $(".modal-body", modal).innerHTML = eventHTML(EVENTS[i], i); $(".modal-card", modal).scrollTop = 0;
+    modal.setAttribute("aria-labelledby", "m-title");
+  }
+  function openEvent(slug, push, swap) {
+    if (!window.EVENTS || !EVENTS.some(function (e) { return e.slug === slug; })) return;
+    ensureModal(); var wasOpen = !modal.hidden; openSlug = slug;
+    if (!wasOpen) lastFocus = doc.activeElement;
+    renderModal(); modal.hidden = false; doc.body.style.overflow = "hidden";
+    if (swap && wasOpen) history.replaceState({ ev: slug }, "", "#event-" + slug);
+    else if (push) history.pushState({ ev: slug }, "", "#event-" + slug);
+    if (!wasOpen) { requestAnimationFrame(function () { modal.classList.add("show"); }); $(".modal-x", modal).focus(); }
+  }
+  function hideModal() { if (!modal || modal.hidden) return; modal.classList.remove("show"); modal.hidden = true; doc.body.style.overflow = ""; openSlug = null; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+  function closeEvent() { if (history.state && history.state.ev) history.back(); else { hideModal(); if (/^#event-/.test(location.hash)) history.replaceState(null, "", location.pathname + location.search); } }
+  function syncHash() { var m = /^#event-(.+)$/.exec(location.hash); if (m) openEvent(m[1], false); else hideModal(); }
+  window.addEventListener("popstate", syncHash); window.addEventListener("hashchange", syncHash);
+  function renderDynamic() { if (openSlug && modal && !modal.hidden) renderModal(); }
 
   /* ---------- promoter 101: pin horizontal ---------- */
   var hp = $(".h-pin");
@@ -218,6 +226,7 @@
     function show(k) { $$(".form-msg", form).forEach(function (m) { m.className = "form-msg" + (m.dataset.k === k ? " " + k : ""); }); }
   });
 
-  renderDynamic(); initScroll();
+  if (track && window.EVENTS) { track.innerHTML = EVENTS.map(cardHTML).join(""); initCarousel(); }
+  syncHash(); initScroll();
   window.addEventListener("load", function () { if (window.ScrollTrigger) ScrollTrigger.refresh(); });
 })();

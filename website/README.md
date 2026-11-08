@@ -8,23 +8,24 @@ Hanya oranye `#F47527`, hitam, putih (token di `:root` pada `assets/css/style.cs
 
 ## Struktur
 - `index.html`, `promoter-101.html`, `about.html`, `services.html`, `contact.html`, `privacy-policy.html`, `terms.html`
-- `events/*.html`: satu file per event, semuanya sama kecuali `data-event`, `<title>`, meta, dan JSON-LD
-- `assets/js/events.js`: SATU-SATUNYA sumber data event (carousel Home + halaman event)
+- Event tampil sebagai jendela (modal) di Home, tanpa halaman terpisah. Link langsung: `index.html#event-<slug>`; tombol Back/Esc menutup jendela
+- `assets/js/events.js`: SATU-SATUNYA sumber data event (carousel + jendela event)
 - `assets/js/main.js`: header/footer (satu sumber), animasi GSAP, carousel, lightbox, toggle bahasa
 - Bilingual: pasangan elemen `lang="en"` / `lang="id"`, toggle ID|EN di header (disimpan di localStorage)
 - GSAP 3.12.5 + ScrollTrigger dari cdnjs. Tanpa GSAP / dengan reduced-motion, situs tetap berfungsi tanpa animasi.
 
 ## Tambah event
-1. Tambah satu objek di `events.js` (salin `base(...)`).
-2. Duplikat `events/ikon.html`, ganti `data-event="slug"`, title, meta, JSON-LD.
-Mengisi event: cukup prompt "Park Ji Hoon: tanggal, venue, cerita per fase, angka", lalu field di `events.js` diisi.
+Tambah satu objek di `events.js` (salin salah satu yang ada) dan taruh gambar di `assets/img/events/`. Tidak perlu file HTML baru.
+Mengisi event: cukup prompt "Park Ji Hoon: tanggal, venue, cerita per fase, angka".
 
 ## Yang masih harus diisi sebelum tayang
 Semua tanda **[ISI]** dan **[VERIFIKASI]** tampil oranye bergaris di halaman; cari di kode dengan `grep -rn "ISI\|VERIFIKASI" website`.
-- Foto & poster asli (sekarang placeholder SVG; perlu izin tertulis agensi/principal)
+- Poster iKON (artwork asli tertaut ke file lokal, belum terkirim) dan poster Park Ji Hoon; foto event. Perlu izin tertulis agensi/principal
 - Detail 3 event (tanggal, venue, cerita, angka, status past/upcoming)
 - Endpoint Formspree (`contact.html`, `action`), site key Cloudflare Turnstile, ID GA4
 - WhatsApp, URL sosial media resmi (X, FB, Threads, TikTok, LinkedIn, YouTube)
 - `assets/img/og-image.jpg` 1200x630 (<300 KB); sementara ada `og-image.svg` sebagai acuan desain
 - Klaim FAQ (imigrasi, asuransi, GOERS), KBLI, Privacy/Terms ditinjau penasihat hukum
 - Logo asli (`assets/img/logo.svg` masih wordmark sementara)
+- Promoter 101: bagian "Aturan main di Indonesia" bersumber dari artikel publik (daftar di halaman). Verifikasi dengan instansi/penasihat hukum sebelum tayang
+- Kim Bum: simbol ornamen di judul "PAGE" belum dipastikan; ringkasan, cerita, dan angka masih [ISI]
