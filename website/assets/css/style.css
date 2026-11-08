@@ -16,17 +16,27 @@ body{background:var(--ink);color:var(--text);font:400 1rem/1.65 var(--f-body);ov
 /* latar animasi di SEMUA halaman: gradien oranye mengalir + percikan kecil biru royal */
 body::before,body::after{content:"";position:fixed;z-index:-1;pointer-events:none;will-change:transform}
 body::before{inset:-25%;background:
-  radial-gradient(45% 40% at 20% 25%,rgba(244,117,39,.62),transparent 72%),
-  radial-gradient(40% 35% at 82% 18%,rgba(244,117,39,.42),transparent 72%),
-  radial-gradient(50% 45% at 68% 86%,rgba(244,117,39,.48),transparent 72%),
-  radial-gradient(38% 34% at 14% 82%,rgba(244,117,39,.36),transparent 72%),
-  radial-gradient(48% 42% at 50% 52%,rgba(244,117,39,.26),transparent 74%);
+  radial-gradient(55% 48% at 20% 25%,rgba(244,117,39,.38),rgba(244,117,39,.12) 45%,transparent 80%),
+  radial-gradient(50% 42% at 82% 18%,rgba(244,117,39,.26),rgba(244,117,39,.08) 45%,transparent 80%),
+  radial-gradient(58% 50% at 68% 86%,rgba(244,117,39,.30),rgba(244,117,39,.10) 45%,transparent 80%),
+  radial-gradient(46% 40% at 14% 82%,rgba(244,117,39,.22),rgba(244,117,39,.07) 45%,transparent 80%),
+  radial-gradient(56% 48% at 50% 52%,rgba(244,117,39,.15),transparent 82%);
   animation:bgFlow 22s ease-in-out infinite alternate}
-body::after{width:30vmax;height:30vmax;right:-6vmax;bottom:-9vmax;border-radius:50%;
-  background:radial-gradient(circle,rgba(65,105,225,.5),rgba(65,105,225,0) 66%);
-  animation:blueFloat 26s ease-in-out infinite alternate}
+body::after{inset:-8%;background:
+  radial-gradient(circle 46px at 9% 18%,rgba(65,105,225,.55),transparent),
+  radial-gradient(circle 30px at 22% 64%,rgba(65,105,225,.5),transparent),
+  radial-gradient(circle 58px at 31% 12%,rgba(65,105,225,.4),transparent),
+  radial-gradient(circle 34px at 44% 83%,rgba(65,105,225,.55),transparent),
+  radial-gradient(circle 26px at 53% 37%,rgba(65,105,225,.45),transparent),
+  radial-gradient(circle 52px at 66% 70%,rgba(65,105,225,.45),transparent),
+  radial-gradient(circle 32px at 74% 21%,rgba(65,105,225,.55),transparent),
+  radial-gradient(circle 24px at 83% 48%,rgba(65,105,225,.5),transparent),
+  radial-gradient(circle 44px at 91% 86%,rgba(65,105,225,.5),transparent),
+  radial-gradient(circle 28px at 12% 91%,rgba(65,105,225,.45),transparent);
+  animation:blueFloat 30s ease-in-out infinite alternate,blueTwinkle 7s ease-in-out infinite alternate}
 @keyframes bgFlow{0%{transform:translate3d(-4%,-3%,0) rotate(0) scale(1)}50%{transform:translate3d(5%,4%,0) rotate(6deg) scale(1.12)}100%{transform:translate3d(-2%,6%,0) rotate(-5deg) scale(1.05)}}
-@keyframes blueFloat{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-22vw,-14vh,0) scale(1.15)}100%{transform:translate3d(-8vw,-30vh,0) scale(.9)}}
+@keyframes blueFloat{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-2.5%,3%,0)}100%{transform:translate3d(2%,-2.5%,0)}}
+@keyframes blueTwinkle{from{opacity:.55}to{opacity:1}}
 html{scroll-padding-top:var(--hdr)}
 img,svg{max-width:100%;display:block}
 a{color:inherit}
@@ -175,8 +185,8 @@ html[data-lang="en"] [lang="id"],html[data-lang="id"] [lang="en"]{display:none!i
 @keyframes mq{to{transform:translateX(-50%)}}
 
 /* cta band */
-.cta-band{text-align:center;color:#000;padding:var(--s9) 0;background:radial-gradient(28% 55% at 92% 100%,rgba(65,105,225,.55),transparent 70%),linear-gradient(115deg,#F47527,#ff9650 45%,#F47527 70%,#e8631a);background-size:100% 100%,220% 220%;animation:ctaFlow 14s ease-in-out infinite alternate}
-@keyframes ctaFlow{from{background-position:0 0,0% 50%}to{background-position:0 0,100% 50%}}
+.cta-band{text-align:center;color:#000;padding:var(--s9) 0;background:radial-gradient(circle 34px at 93% 78%,rgba(65,105,225,.55),transparent),radial-gradient(circle 22px at 86% 30%,rgba(65,105,225,.5),transparent),radial-gradient(circle 28px at 8% 70%,rgba(65,105,225,.45),transparent),linear-gradient(115deg,#F47527,#ff9650 45%,#F47527 70%,#e8631a);background-size:100% 100%,100% 100%,100% 100%,220% 220%;animation:ctaFlow 14s ease-in-out infinite alternate}
+@keyframes ctaFlow{from{background-position:0 0,0 0,0 0,0% 50%}to{background-position:0 0,0 0,0 0,100% 50%}}
 .cta-band h2{max-width:22ch;margin:0 auto;font-size:clamp(2rem,4.4vw,3.6rem)}
 .cta-band .btn.primary{background:#000;color:#fff;font-size:1.15rem;padding:1.1em 2.2em}
 .cta-band .btn.primary:hover{background:#1a1a1a}
@@ -267,7 +277,7 @@ html[data-lang="en"] [lang="id"],html[data-lang="id"] [lang="en"]{display:none!i
 .modal{position:fixed;inset:0;z-index:400;display:grid;place-items:center;padding:16px}
 .modal[hidden]{display:none}
 .modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .35s}
-.modal-card{position:relative;width:min(100%,1040px);max-height:calc(100vh - 32px);overflow:auto;background:radial-gradient(70% 45% at 8% 0%,rgba(244,117,39,.30),transparent 70%),radial-gradient(35% 30% at 100% 100%,rgba(65,105,225,.28),transparent 70%),rgba(14,14,14,.94);background-size:160% 160%,100% 100%,100% 100%;animation:drift 16s ease-in-out infinite alternate;border:1px solid var(--glass-b);--r:32px;--pad:var(--s5);border-radius:var(--r);padding:var(--pad);opacity:0;transform:translateY(28px) scale(.97);transition:opacity .35s,transform .45s cubic-bezier(.2,.8,.2,1);overscroll-behavior:contain}
+.modal-card{position:relative;width:min(100%,1040px);max-height:calc(100vh - 32px);overflow:auto;background:radial-gradient(75% 50% at 8% 0%,rgba(244,117,39,.20),transparent 78%),radial-gradient(circle 30px at 96% 88%,rgba(65,105,225,.45),transparent),radial-gradient(circle 20px at 90% 12%,rgba(65,105,225,.4),transparent),rgba(14,14,14,.94);background-size:160% 160%,100% 100%,100% 100%,100% 100%;animation:drift 16s ease-in-out infinite alternate;border:1px solid var(--glass-b);--r:32px;--pad:var(--s5);border-radius:var(--r);padding:var(--pad);opacity:0;transform:translateY(28px) scale(.97);transition:opacity .35s,transform .45s cubic-bezier(.2,.8,.2,1);overscroll-behavior:contain}
 .modal.show .modal-bg{opacity:1}.modal.show .modal-card{opacity:1;transform:none}
 .modal-x{position:sticky;top:0;float:right;z-index:2;width:44px;height:44px;border-radius:50%;border:1px solid var(--glass-b);background:#000;color:#fff;font-size:1rem;cursor:pointer;margin:-8px -8px 0 0}
 .modal-x:hover{background:var(--brand);color:#000}
