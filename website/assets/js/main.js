@@ -37,7 +37,7 @@
   var h = $("#site-header");
   if (h) {
     h.className = "site-header"; h.setAttribute("role", "banner");
-    h.innerHTML = '<div class="wrap"><a class="brand" href="' + base + 'index.html" aria-label="WithUs Indonesia"><img src="' + base + 'assets/img/logo.svg" width="150" height="33" alt="WithUs Indonesia"></a>' +
+    h.innerHTML = '<div class="wrap"><a class="brand" href="' + base + 'index.html" aria-label="WithUs Indonesia"><img src="' + base + 'assets/img/logo.png" width="114" height="45" alt="WithUs Indonesia"></a>' +
       '<button class="burger" aria-label="Menu" aria-expanded="false" aria-controls="nav"><span></span><span></span></button>' +
       '<nav class="nav" id="nav" aria-label="Main">' + NAV.map(function (n) {
         return '<a href="' + base + n[0] + '"' + (n[0] === path ? ' aria-current="page"' : "") + ">" + bi(n[1], n[2]) + "</a>";
@@ -53,7 +53,7 @@
   var f = $("#site-footer");
   if (f) {
     f.className = "site-footer"; f.setAttribute("role", "contentinfo");
-    f.innerHTML = '<div class="wrap"><div class="foot-grid"><div><img src="' + base + 'assets/img/logo.svg" width="150" height="33" alt="WithUs Indonesia">' +
+    f.innerHTML = '<div class="wrap"><div class="foot-grid"><div><img src="' + base + 'assets/img/logo.png" width="114" height="45" alt="WithUs Indonesia">' +
       '<p class="muted" style="margin-top:14px">' + bi("Bridging Global Creative Vision with Indonesian Entertainment.", "Menjembatani Visi Kreatif Global dengan Industri Hiburan Indonesia.") + "</p>" +
       '<div class="socials">' + SOC.map(function (s) {
         // "#": akun resmi belum diisi -> tidak dirender sebagai link kosong
@@ -120,7 +120,8 @@
       cards.forEach(function (el, i) {
         var off = el.offsetLeft + el.offsetWidth / 2 - mid, d = Math.abs(off), n = Math.min(1, d / (track.clientWidth / 2));
         el.style.transform = "scale(" + (1 - n * .14).toFixed(3) + ") rotateY(" + ((off / track.clientWidth) * -14).toFixed(1) + "deg)";
-        el.style.opacity = (1 - n * .55).toFixed(2);
+        el.style.opacity = (1 - n * .45).toFixed(2);
+        el.style.filter = "blur(" + (n * 4).toFixed(1) + "px)";
         if (d < best) { best = d; idx = i; }
       });
       dots.forEach(function (d, i) { d.setAttribute("aria-current", i === idx); });

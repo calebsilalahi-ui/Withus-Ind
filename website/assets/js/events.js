@@ -23,13 +23,13 @@
       story: story("assets/img/events/kim-bum.webp"), stats: stats(),
       gallery: [{ src: "assets/img/events/kim-bum.webp", alt: "Kim Bum Fanmeeting PAGE official poster" }],
       posters: ["assets/img/events/kim-bum.webp"], partners: ["Kingkong by Starship", "VICSHOT", "WithUs Indonesia"], ticketUrl: null },
-    { slug: "ikon", name: "iKON", subtitle: "[ISI: nama event]", artist: "iKON", status: "past",
-      date: "21 Aug 2026 (Fri)", venue: "Istora Senayan", city: "Jakarta", poster: "assets/img/events/ikon.svg", heroImage: H,
-      accent: "#F47527", summary: ISI, story: story(), stats: stats(),
-      gallery: [{ src: H, alt: "[ISI] foto iKON" }, { src: H, alt: "[ISI] foto penonton" }], posters: ["assets/img/events/ikon.svg"], partners: [], ticketUrl: null },
-    { slug: "park-ji-hoon", name: "Park Ji Hoon", subtitle: "[ISI: nama event]", artist: "Park Ji Hoon", status: "past",
-      date: "[ISI]", venue: "[ISI]", city: "Jakarta", poster: P, heroImage: H,
-      accent: "#F47527", summary: ISI, story: story(), stats: stats(),
-      gallery: [{ src: H, alt: "[ISI] foto Park Ji Hoon" }, { src: H, alt: "[ISI] foto penonton" }], posters: [P], partners: [], ticketUrl: null }
+    { slug: "ikon", name: "iKON World Tour: FOUR EVER", subtitle: "Jakarta · Jay, Song, Bobby, Chan", artist: "iKON", status: "past",
+      date: "21 Aug 2026 (Fri)", venue: "Istora Senayan", city: "Jakarta", poster: "assets/img/events/ikon.webp", heroImage: "assets/img/events/ikon.webp",
+      accent: "#F47527", summary: ISI, story: story("assets/img/events/ikon.webp"), stats: stats(),
+      gallery: [{ src: "assets/img/events/ikon.webp", alt: "iKON World Tour FOUR EVER Jakarta official poster" }, { src: H, alt: "[ISI] foto penonton" }], posters: ["assets/img/events/ikon.webp"], partners: [], ticketUrl: null },
+    { slug: "park-ji-hoon", name: "Park Ji Hoon RE:FLECT Fanconcert", subtitle: "2026 Park Ji Hoon Asia Fancon in Jakarta", artist: "Park Ji Hoon", status: "past",
+      date: "29 Aug 2026 (Sat)", venue: "Spike Air Dome, PIK 2", city: "Jakarta", poster: "assets/img/events/park-ji-hoon.webp", heroImage: "assets/img/events/park-ji-hoon.webp",
+      accent: "#F47527", summary: ISI, story: story("assets/img/events/park-ji-hoon.webp"), stats: stats(),
+      gallery: [{ src: "assets/img/events/park-ji-hoon.webp", alt: "Park Ji Hoon RE:FLECT Fanconcert Jakarta official poster" }, { src: H, alt: "[ISI] foto penonton" }], posters: ["assets/img/events/park-ji-hoon.webp"], partners: [], ticketUrl: null }
   ];
 })();

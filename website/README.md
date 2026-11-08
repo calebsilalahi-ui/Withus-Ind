@@ -20,12 +20,12 @@ Mengisi event: cukup prompt "Park Ji Hoon: tanggal, venue, cerita per fase, angk
 
 ## Yang masih harus diisi sebelum tayang
 Semua tanda **[ISI]** dan **[VERIFIKASI]** tampil oranye bergaris di halaman; cari di kode dengan `grep -rn "ISI\|VERIFIKASI" website`.
-- Poster iKON (artwork asli tertaut ke file lokal, belum terkirim) dan poster Park Ji Hoon; foto event. Perlu izin tertulis agensi/principal
+- Poster Kim Bum, iKON, dan Park Ji Hoon sudah dipasang (resolusi rendah, ±390px; kirim file resolusi tinggi). Foto event masih placeholder. Perlu izin tertulis agensi/principal
 - Detail 3 event (tanggal, venue, cerita, angka, status past/upcoming)
 - Endpoint Formspree (`contact.html`, `action`), site key Cloudflare Turnstile, ID GA4
 - WhatsApp, URL sosial media resmi (X, FB, Threads, TikTok, LinkedIn, YouTube)
 - `assets/img/og-image.jpg` 1200x630 (<300 KB); sementara ada `og-image.svg` sebagai acuan desain
 - Klaim FAQ (imigrasi, asuransi, GOERS), KBLI, Privacy/Terms ditinjau penasihat hukum
-- Logo asli (`assets/img/logo.svg` masih wordmark sementara)
+- Logo: `assets/img/logo.png` dari file yang dikirim
 - Promoter 101: bagian "Aturan main di Indonesia" bersumber dari artikel publik (daftar di halaman). Verifikasi dengan instansi/penasihat hukum sebelum tayang
 - Kim Bum: simbol ornamen di judul "PAGE" belum dipastikan; ringkasan, cerita, dan angka masih [ISI]
