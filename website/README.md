@@ -24,8 +24,11 @@ Semua tanda **[ISI]** dan **[VERIFIKASI]** tampil oranye bergaris di halaman; ca
 - Detail 3 event (tanggal, venue, cerita, angka, status past/upcoming)
 - Endpoint Formspree (`contact.html`, `action`), site key Cloudflare Turnstile, ID GA4
 - WhatsApp, URL sosial media resmi (X, FB, Threads, TikTok, LinkedIn, YouTube)
-- `assets/img/og-image.jpg` 1200x630 (<300 KB); sementara ada `og-image.svg` sebagai acuan desain
+- `assets/img/og-image.jpg` sudah ada (1200x630, 44 KB); uji dengan Facebook Sharing Debugger setelah tayang
 - Klaim FAQ (imigrasi, asuransi, GOERS), KBLI, Privacy/Terms ditinjau penasihat hukum
 - Logo: `assets/img/logo.png` dari file yang dikirim
 - Promoter 101: bagian "Aturan main di Indonesia" bersumber dari artikel publik (daftar di halaman). Verifikasi dengan instansi/penasihat hukum sebelum tayang
 - Kim Bum: simbol ornamen di judul "PAGE" belum dipastikan; ringkasan, cerita, dan angka masih [ISI]
+- Carousel Home adalah ring 3D: irisan vertikal membentuk kartu melengkung. Jika event kurang dari 6, event diulang agar ring penuh. Tambah event di `events.js` dan ring menyesuaikan
+- Statistik Home hanya memuat angka yang terverifikasi (20+ tahun tim, 3 pertunjukan 2026); tambah angka lain setelah diverifikasi
+- Salin email, ikon sosial, dan link Instagram memakai SVG bawaan (tanpa library). Komponen shadcn/skiper tidak dipakai karena situs ini statis tanpa build
