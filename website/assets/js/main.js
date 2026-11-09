@@ -68,9 +68,6 @@
       '<div class="socials">' + SOC.map(function (s) {
         return '<a href="' + s[1] + '" rel="noopener" target="_blank" aria-label="' + s[0] + '">' + icon(s[0]) + "</a>";
       }).join("") + "</div></div>" +
-      '<div><h3>' + bi("Contact", "Kontak") + '</h3><ul><li><a href="mailto:admin@withusindonesia.com">admin@withusindonesia.com</a><button class="copy-btn" type="button" data-copy="admin@withusindonesia.com">Copy</button></li>' +
-      '<li>WhatsApp: <a href="https://wa.me/828170288258" target="_blank" rel="noopener">+82 817-0288-258</a></li>' +
-      "<li>Treasury Tower Lt. 5 Unit J, District 8 SCBD, Jakarta Selatan</li><li>PT Harpa Ananta Sora</li></ul></div>" +
       '<div><h3>' + bi("Company", "Perusahaan") + '</h3><ul><li><a href="' + base + 'privacy-policy.html">Privacy Policy</a></li><li><a href="' + base + 'terms.html">Terms</a></li>' +
       '<li><a href="mailto:admin@withusindonesia.com?subject=Media%20Kit%20Request">Media Kit</a></li></ul></div></div>' +
       '<div class="copy"><span>© ' + new Date().getFullYear() + " PT Harpa Ananta Sora</span><span>WithUs Indonesia</span></div></div>";
