@@ -77,10 +77,18 @@
     headerEl.setAttribute("role", "banner");
 
     headerEl.innerHTML = `
-      <div class="wrap">
+      <div class="wrap header-wrap">
         <a class="brand" href="${base}index.html" aria-label="WithUs Indonesia">
-          <img src="${base}assets/img/logo.png" width="114" height="45" alt="WithUs Indonesia">
+          <img src="${base}assets/img/logo.svg" width="160" height="30" alt="WithUs Indonesia">
         </a>
+        <nav class="desktop-nav" aria-label="Main Navigation">
+          <a href="${base}index.html" ${(location.pathname.endsWith("index.html") || location.pathname.endsWith("/")) ? 'aria-current="page"' : ''}>${bi("Home", "Beranda")}</a>
+          <a href="${base}index.html#events">${bi("Events", "Event")}</a>
+          <a href="${base}about.html" ${location.pathname.endsWith("about.html") ? 'aria-current="page"' : ''}>${bi("About", "Tentang")}</a>
+          <a href="${base}services.html" ${location.pathname.endsWith("services.html") ? 'aria-current="page"' : ''}>${bi("Services", "Layanan")}</a>
+          <a href="${base}promoter-101.html" ${location.pathname.endsWith("promoter-101.html") ? 'aria-current="page"' : ''}>Promoter 101</a>
+          <a href="${base}contact.html" ${location.pathname.endsWith("contact.html") ? 'aria-current="page"' : ''}>${bi("Contact", "Kontak")}</a>
+        </nav>
         <div class="header-actions">
           <div class="lang" role="group" aria-label="Language">
             <button data-l="id" aria-pressed="${lang() === 'id'}">ID</button>
@@ -118,7 +126,7 @@
         <aside class="staggered-menu-panel" id="sm-panel">
           <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
             <a href="${base}index.html" class="sm-logo" aria-label="WithUs Indonesia">
-              <img src="${base}assets/img/logo.png" width="114" height="45" alt="WithUs Indonesia">
+              <img src="${base}assets/img/logo.svg" width="160" height="30" alt="WithUs Indonesia">
             </a>
             <div style="display:flex;align-items:center;gap:16px">
               <div class="lang sm-lang" role="group" aria-label="Language Switch">
@@ -919,7 +927,7 @@
               </div>
               <div class="field-group">
                 <label>${bi("Project Brief / Message *", "Ringkasan Proyek / Pesan *")}</label>
-                <textarea id="step-message" placeholder="${bi("Tell us about the artist, concept, and required deliverables...", "Ceritakan mengenai artis, konsep pertunjukan, dan kebutuhan Anda...")}" required></textarea>
+                <textarea id="step-message" placeholder="${lang() === 'id' ? 'Ceritakan mengenai artis, konsep pertunjukan, dan kebutuhan Anda...' : 'Tell us about the artist, concept, and required deliverables...'}" required></textarea>
               </div>
             </div>
           </div>
@@ -1366,7 +1374,7 @@
         <div class="foot-main-grid">
           <div class="foot-col foot-brand">
             <a class="brand" href="${base}index.html" aria-label="WithUs Indonesia">
-              <img src="${base}assets/img/logo.png" width="114" height="45" alt="WithUs Indonesia" loading="lazy">
+              <img src="${base}assets/img/logo.svg" width="160" height="30" alt="WithUs Indonesia" loading="lazy">
             </a>
             <p class="foot-tagline">
               ${bi("Bridging Global Creative Vision with Indonesian Entertainment", "Menjembatani Visi Kreatif Global dengan Industri Hiburan Indonesia")}
