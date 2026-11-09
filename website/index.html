@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap">
 <link rel="stylesheet" href="assets/css/style.css">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "WithUs Indonesia", "legalName": "PT Harpa Ananta Sora", "url": "https://www.withusindonesia.com", "email": "martha@withusindonesia.com", "address": {"@type": "PostalAddress", "streetAddress": "Treasury Tower Lt. 5 Unit J, District 8 SCBD", "addressLocality": "Jakarta Selatan", "addressCountry": "ID"}, "sameAs": ["https://instagram.com/withusind"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "WithUs Indonesia", "legalName": "PT Harpa Ananta Sora", "url": "https://www.withusindonesia.com", "email": "martha@withusindonesia.com", "address": {"@type": "PostalAddress", "addressLocality": "Jakarta", "addressCountry": "ID"}, "sameAs": ["https://instagram.com/withusind"]}</script>
 </head>
 <body>
 <header id="site-header"></header>
@@ -37,16 +37,16 @@
   </div>
 </section>
 
-<!-- React Bits: CircularCarousel 3D Panorama Section -->
+<!-- React Bits: CircularCarousel 3D Cylinder Section -->
 <section id="events" class="events-section">
   <div class="wrap">
     <span class="eyebrow keep"><span class="chevron-motif">&gt;&gt;&gt;</span> <span lang="en">Live Portfolio</span><span lang="id">Portofolio Panggung</span></span>
     <h2 lang="en">Headline Productions: iKON, Park Ji Hoon, Kim Bum</h2>
     <h2 lang="id">Pertunjukan Panggung: iKON, Park Ji Hoon, Kim Bum</h2>
-    <p lang="en" class="muted" style="margin-top:6px">Drag the 3D panorama or use the controls to explore recent stadium and arena productions.</p>
-    <p lang="id" class="muted" style="margin-top:6px">Geser panorama 3D atau gunakan tombol navigasi untuk menelusuri produksi arena kami.</p>
+    <p lang="en" class="muted" style="margin-top:6px">Drag the 3D cylinder or use the controls to explore recent stadium and arena productions.</p>
+    <p lang="id" class="muted" style="margin-top:6px">Geser silinder 3D atau gunakan tombol navigasi untuk menelusuri produksi arena kami.</p>
   </div>
-  <div class="carousel-stage-container" style="width: 100%; height: 560px; position: relative;">
+  <div class="carousel-stage-container">
     <button class="carousel-arrow carousel-arrow--prev" id="carousel-btn-prev" aria-label="Previous event">
       <svg class="ico" viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2.5"><path d="M15 19l-7-7 7-7"/></svg>
     </button>
@@ -55,10 +55,11 @@
       <svg class="ico" viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2.5"><path d="M9 5l7 7-7 7"/></svg>
     </button>
   </div>
-  <div style="margin-top:22px;text-align:center">
-    <button class="btn primary" id="rc-open">
-      <span lang="en">View Production Dossier</span>
-      <span lang="id">Lihat Detail Produksi</span>
+  <div class="carousel-action-wrap" style="margin-top:20px;text-align:center">
+    <button class="btn primary" id="rc-open" aria-label="See Event Details">
+      <span lang="en">See Event</span>
+      <span lang="id">Lihat Event</span>
+      <svg class="ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </button>
   </div>
 </section>
@@ -111,7 +112,7 @@
     </div>
     <div class="partners-container" data-reveal>
       <div class="partners-banner">
-        <img src="assets/img/partners-grid.webp" alt="WithUs Indonesia Global Entertainment Partners Network: HYBE, Paradise E&amp;A, KingKong by Starship, 143, RBW, YY Entertainment" loading="lazy">
+        <img src="assets/img/partners-grid.webp" width="2419" height="778" alt="WithUs Indonesia Global Entertainment Partners Network: HYBE, Paradise E&amp;A, KingKong by Starship, 143, RBW, YY Entertainment" loading="lazy">
       </div>
       <div class="partners-names">
         <span>HYBE</span>

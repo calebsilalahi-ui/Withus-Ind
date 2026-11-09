@@ -65,8 +65,8 @@
 
   const SOCIAL_ITEMS = [
     { label: "Instagram", url: "https://instagram.com/withusind" },
-    { label: "WhatsApp Direct", url: "https://wa.me/62818766253?text=Hello%20WithUs%20Indonesia" },
-    { label: "Email", url: "mailto:martha@withusindonesia.com" }
+    { label: "Admin WithUs", url: "https://wa.me/628170288258?text=Hello%20Admin%20WithUs" },
+    { label: "Email", url: "mailto:admin@withusindonesia.com" }
   ];
 
   function initHeaderAndMenu() {
@@ -312,16 +312,17 @@
     constructor(container, options = {}) {
       this.container = container;
       this.options = Object.assign({
-        preset: "panorama",
+        preset: "cylinder",
         intro: "rise",
         cardWidth: 220,
-        aspectRatio: 0.75,
+        aspectRatio: 1,
         speed: 14,
         gap: 25,
-        tilt: 0,
-        perspective: 1800,
+        tilt: -5,
+        perspective: 2500,
+        curve: 1,
         captions: true,
-        parallax: 0.28,
+        parallax: 0.3,
         depthFade: 0.55,
         fadeColor: "#070709",
         innerShade: 0.6,
@@ -334,7 +335,7 @@
         focusOnClick: true
       }, options);
 
-      this.layout = PRESETS[this.options.preset] || PRESETS.panorama;
+      this.layout = PRESETS[this.options.preset] || PRESETS.cylinder;
       this.axis = this.layout.axis;
       this.tiltValue = this.options.tilt !== undefined ? this.options.tilt : this.layout.tilt;
       this.curveValue = this.options.curve !== undefined ? this.options.curve : this.layout.curve;
@@ -398,24 +399,30 @@
       this.captionSub = $(".circular-carousel__subtitle", this.container);
       this.captionCount = $(".circular-carousel__count", this.container);
 
+      const TILES = 8;
       this.cards = [];
       this.items.forEach((item, i) => {
         const card = doc.createElement("div");
         card.className = "circular-carousel__card";
         card.dataset.index = i;
         card.dataset.slug = item.slug;
-        card.tabIndex = -1;
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
         card.setAttribute("aria-label", item.name);
 
-        card.innerHTML = `
-          <div class="circular-carousel__tile">
-            <div class="circular-carousel__frame">
-              <img class="circular-carousel__photo" src="${item.poster}" alt="${esc(item.name)}" draggable="false">
-              <div class="circular-carousel__shade"></div>
-              <div class="circular-carousel__inner"></div>
+        let tilesHtml = "";
+        for (let t = 0; t < TILES; t++) {
+          tilesHtml += `
+            <div class="circular-carousel__tile" data-tile="${t}">
+              <div class="circular-carousel__frame">
+                <img class="circular-carousel__photo" src="${item.poster}" alt="${esc(item.name)}" draggable="false">
+                <div class="circular-carousel__shade"></div>
+                <div class="circular-carousel__inner"></div>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
+        card.innerHTML = tilesHtml;
         this.ring.appendChild(card);
         this.cards.push(card);
       });
@@ -472,7 +479,11 @@
       this.drop = (h / fit) * 0.55 + this.cardH;
       this.stage.style.transform = `scale(${fit})`;
 
-      // Configure each card dimensions
+      // Configure each card dimensions and bendable sliced tiles
+      const TILES = 8;
+      const tileW = this.cardW / TILES;
+      const bend = this.cardW / Math.max(0.001, this.curveValue);
+
       this.cards.forEach((card, i) => {
         const base = i * this.step;
         card.style.width = `${this.cardW}px`;
@@ -483,17 +494,48 @@
         const z = this.layout.inward ? -this.radius : this.radius;
         card.style.transform = `rotateY(${base}deg) translateZ(${z}px)`;
 
-        const frame = $(".circular-carousel__frame", card);
-        if (frame) {
-          frame.style.width = `${this.cardW}px`;
-          frame.style.height = `${this.cardH}px`;
-          frame.style.borderRadius = `${this.options.cornerRadius}px`;
-        }
-        const photo = $(".circular-carousel__photo", card);
-        if (photo) {
-          photo.style.width = `${this.cardW}px`;
-          photo.style.height = `${this.cardH}px`;
-        }
+        const tiles = $$(".circular-carousel__tile", card);
+        tiles.forEach((tile, t) => {
+          tile.style.width = `${tileW + 0.6}px`;
+          tile.style.height = `${this.cardH}px`;
+          tile.style.left = `${t * tileW}px`;
+          tile.style.top = "0px";
+
+          if (this.curveValue > 0) {
+            const center = (t + 0.5) * tileW - this.cardW / 2;
+            const alpha = center / bend;
+            const shift = bend * Math.sin(alpha);
+            const sink = bend * (1 - Math.cos(alpha));
+            const turn = (alpha * 180) / Math.PI;
+            tile.style.transform = `translate3d(${shift - center}px, 0, ${-sink}px) rotateY(${turn}deg)`;
+          } else {
+            tile.style.transform = "none";
+          }
+
+          const r = this.options.cornerRadius;
+          if (t === 0) {
+            tile.style.borderTopLeftRadius = `${r}px`;
+            tile.style.borderBottomLeftRadius = `${r}px`;
+          } else if (t === TILES - 1) {
+            tile.style.borderTopRightRadius = `${r}px`;
+            tile.style.borderBottomRightRadius = `${r}px`;
+          } else {
+            tile.style.borderRadius = "0";
+          }
+
+          const frame = $(".circular-carousel__frame", tile);
+          if (frame) {
+            frame.style.width = `${this.cardW}px`;
+            frame.style.height = `${this.cardH}px`;
+            frame.style.transform = `translateX(${-t * tileW}px)`;
+          }
+
+          const photo = $(".circular-carousel__photo", tile);
+          if (photo) {
+            photo.style.width = `${this.cardW}px`;
+            photo.style.height = `${this.cardH}px`;
+          }
+        });
       });
     }
 
@@ -568,15 +610,12 @@
         if (!card) return;
         const idx = parseInt(card.dataset.index, 10);
         const cardAngle = -idx * this.step;
-        const normAngle = ((this.angle % 360) + 360) % 360;
-        const normTarget = ((cardAngle % 360) + 360) % 360;
+        this.targetAngle = cardAngle;
+        this.holdUntil = performance.now() + 2500;
 
         const slug = card.dataset.slug;
-        if (Math.abs(normAngle - normTarget) < 18 || Math.abs(normAngle - normTarget) > 342) {
-          if (window.openEventModal) window.openEventModal(slug);
-        } else {
-          this.targetAngle = cardAngle;
-          this.holdUntil = performance.now() + 2500;
+        if (slug && window.openEventModal) {
+          window.openEventModal(slug);
         }
       });
 
@@ -876,7 +915,7 @@
                 <div style="text-align:center;color:var(--subtle);font-size:0.85rem">— ${bi("OR INSTANT DIRECT ROUTING", "ATAU JALUR CEPAT WHATSAPP")} —</div>
                 <a class="wa-vip-cta" id="btn-wa-vip" href="#" target="_blank" rel="noopener" style="justify-content:center;text-decoration:none">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
-                  <span>${bi("Direct VIP Chat with Martha (+62 818 766 253)", "Chat VIP Langsung dengan Martha (+62 818 766 253)")}</span>
+                  <span>${bi("Direct VIP Chat with Admin WithUs (+62 817-0288-258)", "Chat VIP Langsung dengan Admin WithUs (+62 817-0288-258)")}</span>
                 </a>
               </div>
               <div id="form-feedback" style="display:none;padding:14px;border-radius:12px;margin-top:12px"></div>
@@ -1022,7 +1061,7 @@
         </div>
       `;
 
-      // Pre-fill WhatsApp link to Martha (+62 818 766 253)
+      // Pre-fill WhatsApp link to Admin WithUs (+62 817-0288-258)
       const waBtn = $("#btn-wa-vip", this.container);
       if (waBtn) {
         const text = encodeURIComponent(
@@ -1044,7 +1083,7 @@
 ` +
           `• Brief: ${this.data.message}`
         );
-        waBtn.href = `https://wa.me/62818766253?text=${text}`;
+        waBtn.href = `https://wa.me/628170288258?text=${text}`;
       }
     }
 
@@ -1052,6 +1091,7 @@
       const fb = $("#form-feedback", this.container);
       const submitBtn = $("#btn-submit-form", this.container);
       submitBtn.setAttribute("aria-busy", "true");
+      submitBtn.disabled = true;
 
       // Attempt submit to configured endpoint or store locally
       fetch("https://formspree.io/f/xvgzeyko", {
@@ -1061,6 +1101,7 @@
       })
       .then(res => {
         submitBtn.removeAttribute("aria-busy");
+        submitBtn.disabled = false;
         fb.style.display = "block";
         if (res.ok) {
           fb.style.background = "rgba(46, 204, 113, 0.15)";
@@ -1076,20 +1117,21 @@
           fb.style.border = "1px solid var(--brand)";
           fb.style.color = "#fff";
           fb.innerHTML = tr({
-            en: "Inquiry recorded! Please click the green button above to instantly connect with Martha on WhatsApp.",
-            id: "Permintaan tercatat! Silakan klik tombol hijau di atas untuk terhubung langsung dengan Martha di WhatsApp."
+            en: "Inquiry recorded! Please click the WhatsApp button above to instantly connect with Admin WithUs on WhatsApp.",
+            id: "Permintaan tercatat! Silakan klik tombol WhatsApp di atas untuk terhubung langsung dengan Admin WithUs di WhatsApp."
           });
         }
       })
       .catch(() => {
         submitBtn.removeAttribute("aria-busy");
+        submitBtn.disabled = false;
         fb.style.display = "block";
         fb.style.background = "rgba(244, 117, 39, 0.15)";
         fb.style.border = "1px solid var(--brand)";
         fb.style.color = "#fff";
         fb.innerHTML = tr({
-          en: "Inquiry drafted! Please tap the WhatsApp button above to send your message directly.",
-          id: "Draft permintaan siap! Silakan ketuk tombol WhatsApp di atas untuk mengirim pesan langsung."
+          en: "Inquiry drafted! Please tap the WhatsApp button above to send your message directly to Admin WithUs.",
+          id: "Draft permintaan siap! Silakan ketuk tombol WhatsApp di atas untuk mengirim pesan langsung ke Admin WithUs."
         });
       });
     }
@@ -1275,25 +1317,124 @@
   }
 
   /* ==========================================================================
-     7. INITIALIZATION
+     8. UNIFIED GLOBAL SITE FOOTER INJECTION
+     ========================================================================== */
+  function initFooter() {
+    const footerEl = $("#site-footer");
+    if (!footerEl) return;
+
+    footerEl.className = "site-footer";
+    footerEl.setAttribute("role", "contentinfo");
+    footerEl.innerHTML = `
+      <div class="wrap">
+        <div class="foot-main-grid">
+          <div class="foot-col foot-brand">
+            <a class="brand" href="${base}index.html" aria-label="WithUs Indonesia">
+              <img src="${base}assets/img/logo.png" width="114" height="45" alt="WithUs Indonesia" loading="lazy">
+            </a>
+            <p class="foot-tagline">
+              ${bi("Bridging Global Creative Vision with Indonesian Entertainment", "Menjembatani Visi Kreatif Global dengan Industri Hiburan Indonesia")}
+            </p>
+            <div class="foot-entity">
+              <strong>PT Harpa Ananta Sora · WithUs Indonesia</strong><br>
+              <span>Jakarta, Indonesia</span>
+            </div>
+            <div class="foot-direct">
+              <a href="https://wa.me/628170288258?text=Hello%20Admin%20WithUs" class="foot-contact-link" target="_blank" rel="noopener">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
+                <span>Admin WithUs: +62 817-0288-258</span>
+              </a>
+              <a href="mailto:admin@withusindonesia.com" class="foot-contact-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>admin@withusindonesia.com</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="foot-col foot-nav">
+            <h4 class="foot-heading">${bi("Navigation", "Navigasi")}</h4>
+            <ul class="foot-links">
+              <li><a href="${base}index.html">${bi("Home", "Beranda")}</a></li>
+              <li><a href="${base}index.html#events">${bi("Live Events", "Portofolio Event")}</a></li>
+              <li><a href="${base}about.html">${bi("About WithUs", "Tentang Kami")}</a></li>
+              <li><a href="${base}services.html">${bi("Capabilities & Services", "Layanan & Kapabilitas")}</a></li>
+              <li><a href="${base}promoter-101.html">${bi("Promoter 101 Knowledge", "Panduan Promoter 101")}</a></li>
+              <li><a href="${base}contact.html">${bi("Work WithUs", "Bekerja dengan WithUs")}</a></li>
+            </ul>
+          </div>
+
+          <div class="foot-col foot-services">
+            <h4 class="foot-heading">${bi("Capabilities", "Kapabilitas")}</h4>
+            <ul class="foot-links">
+              <li><a href="${base}services.html#artist-management">${bi("Artist Management", "Manajemen Artis")}</a></li>
+              <li><a href="${base}services.html#ip-development">${bi("IP Development & Localisation", "Pengembangan & Lokalisasi IP")}</a></li>
+              <li><a href="${base}services.html#event-production">${bi("Event Production & Arena Touring", "Produksi Event & Tur Konser")}</a></li>
+              <li><a href="${base}contact.html">${bi("Partnership Inquiries", "Permintaan Kemitraan")}</a></li>
+            </ul>
+          </div>
+
+          <div class="foot-col foot-social">
+            <h4 class="foot-heading">${bi("Official Channels", "Kanal Resmi")}</h4>
+            <p class="foot-desc">${bi("Connect directly with our Jakarta executive team.", "Terhubung langsung dengan tim eksekutif kami di Jakarta.")}</p>
+            <div class="socials">
+              <a href="https://instagram.com/withusind" target="_blank" rel="noopener" aria-label="WithUs Instagram">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              </a>
+              <a href="https://wa.me/628170288258?text=Hello%20Admin%20WithUs" target="_blank" rel="noopener" aria-label="Admin WithUs WhatsApp">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
+              </a>
+              <a href="https://linkedin.com/company/withusindonesia" target="_blank" rel="noopener" aria-label="WithUs LinkedIn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              </a>
+              <a href="https://youtube.com/@withusindonesia" target="_blank" rel="noopener" aria-label="WithUs YouTube">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+              </a>
+              <a href="mailto:admin@withusindonesia.com" aria-label="Email WithUs">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot-bottom">
+          <div class="foot-copy">
+            &copy; 2026 PT Harpa Ananta Sora · WithUs Indonesia. ${bi("All rights reserved.", "Hak cipta dilindungi undang-undang.")}
+          </div>
+          <div class="foot-legal">
+            <a href="${base}privacy-policy.html">${bi("Privacy Policy", "Kebijakan Privasi")}</a>
+            <span class="foot-dot">·</span>
+            <a href="${base}terms.html">${bi("Terms of Use", "Syarat &amp; Ketentuan")}</a>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* ==========================================================================
+     9. INITIALIZATION
      ========================================================================== */
   function start() {
     initHeaderAndMenu();
+    initFooter();
 
     // Initialize Circular Carousel if on page with #ring-carousel
     const carouselEl = $("#ring-carousel");
     if (carouselEl) {
       window.CIRCULAR_CAROUSEL = new CircularCarousel(carouselEl, {
-        preset: "panorama",
+        preset: "cylinder",
         intro: "rise",
         cardWidth: 220,
-        aspectRatio: 0.75,
+        aspectRatio: 1,
         speed: 14,
         captions: true,
-        tilt: 0,
-        perspective: 1800,
+        tilt: -5,
+        perspective: 2500,
         gap: 25,
-        parallax: 0.28
+        parallax: 0.3,
+        curve: 1,
+        momentum: 0.6,
+        snap: true,
+        focusOnClick: true
       });
 
       const prevBtn = $("#carousel-btn-prev");
@@ -1304,7 +1445,8 @@
       const dockBtn = $("#rc-open");
       if (dockBtn) {
         dockBtn.addEventListener("click", () => {
-          if (dockBtn.dataset.slug) openEventModal(dockBtn.dataset.slug);
+          const activeSlug = dockBtn.dataset.slug || (window.CIRCULAR_CAROUSEL && window.CIRCULAR_CAROUSEL.items[window.CIRCULAR_CAROUSEL.activeIndex]?.slug);
+          if (activeSlug && window.openEventModal) openEventModal(activeSlug);
         });
       }
     }

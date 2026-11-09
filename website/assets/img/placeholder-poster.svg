@@ -3,5 +3,5 @@
 <pattern id="p" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M0 40L40 0" stroke="#ffffff10" stroke-width="2"/></pattern></defs>
 <rect width="600" height="800" fill="url(#g)"/><rect width="600" height="800" fill="url(#p)"/>
 <rect x="40" y="40" width="520" height="720" rx="24" fill="none" stroke="#F47527" stroke-width="3" stroke-dasharray="14 10"/>
-<text x="300" y="390" text-anchor="middle" font-family="Arial,sans-serif" font-size="64" font-weight="700" fill="#F47527">[ISI]</text>
+<text x="300" y="390" text-anchor="middle" font-family="Arial,sans-serif" font-size="52" font-weight="700" fill="#F47527">WithUs</text>
 <text x="300" y="440" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" fill="#ffffffb0">Poster belum diunggah</text></svg>
