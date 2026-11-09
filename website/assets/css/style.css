@@ -12,8 +12,8 @@
   --brand-glow: rgba(244, 117, 39, 0.28);
   --gold: #F47527;
   --text: #FFFFFF;
-  --muted: rgba(255, 255, 255, 0.76);
-  --subtle: rgba(255, 255, 255, 0.52);
+  --muted: rgba(255, 255, 255, 0.82);
+  --subtle: rgba(255, 255, 255, 0.60);
   --line: rgba(255, 255, 255, 0.12);
   --line-strong: rgba(255, 255, 255, 0.22);
   --glass: rgba(14, 15, 22, 0.65);
@@ -29,14 +29,38 @@
   --f-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+/* Browser Surfaces (Impeccable & Modern Web Guidance) */
+::selection { background: var(--brand); color: #070709; }
+::-moz-selection { background: var(--brand); color: #070709; }
+input, textarea, select { caret-color: var(--brand); }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: var(--hdr);
+  scrollbar-color: rgba(244, 117, 39, 0.4) var(--ink-2);
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--ink-2); }
+::-webkit-scrollbar-thumb {
+  background: rgba(244, 117, 39, 0.35);
+  border-radius: 4px;
+  border: 2px solid var(--ink-2);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+
 * { box-sizing: border-box; margin: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: var(--hdr); }
 body {
   background: var(--ink);
   color: var(--text);
   font: 400 1rem/1.65 var(--f-body);
   overflow-x: hidden;
   position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Atmospheric subtle luxury top vignette — replaces messy moving gradients */
