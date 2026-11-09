@@ -43,7 +43,7 @@
         return '<a href="' + base + n[0] + '"' + (n[0] === path ? ' aria-current="page"' : "") + ">" + bi(n[1], n[2]) + "</a>";
       }).join("") +
       '<div class="lang" role="group" aria-label="Language"><button data-l="id" aria-pressed="false">ID</button><button data-l="en" aria-pressed="true">EN</button></div>' +
-      '<a class="btn primary" href="' + base + 'contact.html">' + bi("Work with WithUs", "Bekerja Sama dengan WithUs") + "</a></nav></div>";
+      '<a class="btn primary" href="' + base + 'contact.html">' + bi("Work WithUs", "Bekerja dengan WithUs") + "</a></nav></div>";
     var burger = $(".burger", h), nav = $("#nav", h);
     burger.addEventListener("click", function () { var o = nav.classList.toggle("open"); burger.setAttribute("aria-expanded", o); });
     nav.addEventListener("click", function (e) { if (e.target.closest("a")) nav.classList.remove("open"); });
