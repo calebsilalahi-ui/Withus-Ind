@@ -314,7 +314,7 @@
       this.options = Object.assign({
         preset: "cylinder",
         intro: "rise",
-        cardWidth: 220,
+        cardWidth: 260,
         aspectRatio: 1,
         speed: 14,
         gap: 25,
@@ -477,7 +477,8 @@
       }
       this.fit = fit;
       this.drop = (h / fit) * 0.55 + this.cardH;
-      this.stage.style.transform = `scale(${fit})`;
+      const stageOffsetY = this.options.captions ? -20 : 0;
+      this.stage.style.transform = `translateY(${stageOffsetY}px) scale(${fit})`;
 
       // Configure each card dimensions and bendable sliced tiles
       const TILES = 8;
@@ -547,6 +548,10 @@
         this.container.addEventListener("pointerdown", e => {
           if (e.button !== 0) return;
           this.isDragging = true;
+          this.hasDragged = false;
+          this.justDragged = false;
+          this.pointerStartX = e.clientX;
+          this.pointerStartY = e.clientY;
           this.container.setAttribute("data-dragging", "true");
           this.lastPointerPos = e.clientX;
           this.lastTime = performance.now();
@@ -561,6 +566,11 @@
           this.pointer.inside = true;
 
           if (!this.isDragging) return;
+          const dist = Math.hypot(e.clientX - this.pointerStartX, e.clientY - this.pointerStartY);
+          if (dist > 6) {
+            this.hasDragged = true;
+          }
+
           const now = performance.now();
           const dt = Math.max(1, now - this.lastTime);
           const dx = e.clientX - this.lastPointerPos;
@@ -578,6 +588,13 @@
           this.isDragging = false;
           this.container.removeAttribute("data-dragging");
           this.holdUntil = performance.now() + 1800;
+          if (this.hasDragged) {
+            this.justDragged = true;
+            setTimeout(() => {
+              this.justDragged = false;
+              this.hasDragged = false;
+            }, 120);
+          }
           if (this.options.snap) {
             this.targetAngle = Math.round((this.angle + this.velocity * 0.15) / this.step) * this.step;
           }
@@ -606,6 +623,12 @@
       }
 
       this.container.addEventListener("click", e => {
+        if (this.hasDragged || this.justDragged) {
+          this.hasDragged = false;
+          this.justDragged = false;
+          return;
+        }
+
         const card = e.target.closest(".circular-carousel__card");
         if (!card) return;
         const idx = parseInt(card.dataset.index, 10);
@@ -713,10 +736,13 @@
           const fade = 0.42 * Math.pow((1 - facing) / 2, 0.9);
           card.style.setProperty("--cc-depth", fade.toFixed(3));
         } else {
-          card.style.visibility = absWorld > 105 ? "hidden" : "";
+          // In cylinder preset, cards wrap the 3D ring with visible inner shaded faces
+          card.style.visibility = absWorld > 165 ? "hidden" : "";
           const facing = Math.cos(world * Math.PI / 180);
-          const fade = this.options.depthFade * Math.pow((1 - facing) / 2, 1.25);
-          card.style.setProperty("--cc-depth", fade.toFixed(3));
+          const fade = facing > 0
+            ? this.options.depthFade * Math.pow((1 - facing), 1.2)
+            : this.options.depthFade * 0.85;
+          card.style.setProperty("--cc-depth", Math.min(1, Math.max(0, fade)).toFixed(3));
         }
       });
 
@@ -1141,11 +1167,16 @@
      5. EVENT MODAL WITH GALLERY
      ========================================================================== */
   let openModalSlug = null;
+  let closeTimeout = null;
   const modal = $("#ev-modal");
 
   function openEventModal(slug) {
     const event = (window.EVENTS || []).find(e => e.slug === slug);
     if (!event || !modal) return;
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      closeTimeout = null;
+    }
     openModalSlug = slug;
     renderModalContent(event);
     modal.hidden = false;
@@ -1157,10 +1188,12 @@
   function closeEventModal() {
     if (!modal) return;
     modal.classList.remove("show");
-    setTimeout(() => {
+    if (closeTimeout) clearTimeout(closeTimeout);
+    closeTimeout = setTimeout(() => {
       modal.hidden = true;
       doc.body.style.overflow = "";
       openModalSlug = null;
+      closeTimeout = null;
     }, 350);
   }
 
@@ -1287,10 +1320,13 @@
         onEnter: () => {
           gsap.to(obj, {
             val: target,
-            duration: 1.6,
+            duration: 1.0,
             ease: "power2.out",
             onUpdate: () => {
               b.textContent = Math.round(obj.val) + suffix;
+            },
+            onComplete: () => {
+              b.textContent = target + suffix;
             }
           });
         }
@@ -1423,7 +1459,7 @@
       window.CIRCULAR_CAROUSEL = new CircularCarousel(carouselEl, {
         preset: "cylinder",
         intro: "rise",
-        cardWidth: 220,
+        cardWidth: 260,
         aspectRatio: 1,
         speed: 14,
         captions: true,
