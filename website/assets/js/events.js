@@ -1,5 +1,5 @@
 /* WithUs Indonesia — Official Events Data Portfolio
-   Source: Client Event Portfolio Specification */
+   Source: Client Event Portfolio Specification & Company Profile 2026 */
 (function () {
   "use strict";
   window.EVENTS = [
@@ -13,7 +13,7 @@
       venue: "Bengkel Hall SCBD",
       city: "Jakarta, Indonesia",
       poster: "assets/img/events/kim-bum.webp",
-      heroImage: "assets/img/events/kim-bum.webp",
+      heroImage: "assets/img/events/kim-bum-wide.webp",
       accent: "#F47527",
       format: { en: "Fanmeeting", id: "Fanmeeting" },
       summary: {
@@ -30,7 +30,9 @@
         { label: { en: "Official Partners", id: "Mitra Resmi" }, value: "8" }
       ],
       gallery: [
-        { src: "assets/img/events/kim-bum.webp", alt: "Kim Bum Fanmeeting PAGE∞ official poster" }
+        { src: "assets/img/events/kim-bum.webp", alt: "Kim Bum Fanmeeting PAGE∞ stage with audience" },
+        { src: "assets/img/events/kim-bum-collage.webp", alt: "Kim Bum Fanmeeting PAGE∞ multi-angle live event collage" },
+        { src: "assets/img/events/kim-bum-wide.webp", alt: "Kim Bum Fanmeeting PAGE∞ 20th Anniversary stage wide view" }
       ],
       posters: ["assets/img/events/kim-bum.webp"],
       partners: ["GOERS", "Backbone", "Jaga Indonesia", "Rotasi 7", "Kallis.co", "Blend", "Pullman Hotel", "Media Partners"],
@@ -46,7 +48,7 @@
       venue: "SPIKE Airdome, PIK 2",
       city: "Tangerang, Indonesia",
       poster: "assets/img/events/park-ji-hoon.webp",
-      heroImage: "assets/img/events/park-ji-hoon.webp",
+      heroImage: "assets/img/events/park-ji-hoon-wide.webp",
       accent: "#F47527",
       format: { en: "Asia Fan-con", id: "Asia Fan-con" },
       summary: {
@@ -63,7 +65,9 @@
         { label: { en: "Official Partners", id: "Mitra Resmi" }, value: "6" }
       ],
       gallery: [
-        { src: "assets/img/events/park-ji-hoon.webp", alt: "Park Ji-hoon RE:FLECT Fancon official poster" }
+        { src: "assets/img/events/park-ji-hoon.webp", alt: "Park Ji-hoon RE:FLECT Fancon stage with 2,500 fans" },
+        { src: "assets/img/events/park-ji-hoon-collage.webp", alt: "Park Ji-hoon RE:FLECT live event production collage" },
+        { src: "assets/img/events/park-ji-hoon-wide.webp", alt: "Park Ji-hoon RE:FLECT stage wide view" }
       ],
       posters: ["assets/img/events/park-ji-hoon.webp"],
       partners: ["Backbone", "Rotasi 7", "Thunder", "Kallis.co", "Jaga Indonesia", "Media Partners"],
@@ -79,7 +83,7 @@
       venue: "Istora Senayan",
       city: "Jakarta, Indonesia",
       poster: "assets/img/events/ikon.webp",
-      heroImage: "assets/img/events/ikon.webp",
+      heroImage: "assets/img/events/ikon-wide.webp",
       accent: "#F47527",
       format: { en: "K-pop World Tour Concert", id: "Konser Tur Dunia K-pop" },
       summary: {
@@ -96,7 +100,9 @@
         { label: { en: "Official Partners", id: "Mitra Resmi" }, value: "6" }
       ],
       gallery: [
-        { src: "assets/img/events/ikon.webp", alt: "iKON World Tour FOUREVER Jakarta official poster" }
+        { src: "assets/img/events/ikon.webp", alt: "iKON World Tour FOUREVER stage with Istora Senayan audience" },
+        { src: "assets/img/events/ikon-collage.webp", alt: "iKON FOUREVER live concert pyro, confetti, and crowd collage" },
+        { src: "assets/img/events/ikon-wide.webp", alt: "iKON FOUREVER Istora Senayan stage wide view" }
       ],
       posters: ["assets/img/events/ikon.webp"],
       partners: ["Backbone", "Rotasi 7", "Thunder", "Kallis.co", "Jaga Indonesia", "Media Partners"],
