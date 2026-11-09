@@ -43,7 +43,7 @@
         return '<a href="' + base + n[0] + '"' + (n[0] === path ? ' aria-current="page"' : "") + ">" + bi(n[1], n[2]) + "</a>";
       }).join("") +
       '<div class="lang" role="group" aria-label="Language"><button data-l="id" aria-pressed="false">ID</button><button data-l="en" aria-pressed="true">EN</button></div>' +
-      '<a class="btn primary" href="' + base + 'contact.html">' + bi("Work With Us", "Bekerja Sama") + "</a></nav></div>";
+      '<a class="btn primary" href="' + base + 'contact.html">' + bi("Work with WithUs", "Bekerja Sama dengan WithUs") + "</a></nav></div>";
     var burger = $(".burger", h), nav = $("#nav", h);
     burger.addEventListener("click", function () { var o = nav.classList.toggle("open"); burger.setAttribute("aria-expanded", o); });
     nav.addEventListener("click", function (e) { if (e.target.closest("a")) nav.classList.remove("open"); });
@@ -59,16 +59,17 @@
     YouTube: '<rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.5v5l4.5-2.5z"/>'
   };
   function icon(n) { return '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + IC[n] + "</svg>"; }
-  var SOC = [["Instagram", "https://instagram.com/withusind"], ["X", "#"], ["Facebook", "#"], ["Threads", "#"], ["TikTok", "#"], ["LinkedIn", "#"], ["YouTube", "#"]];
+  var SOC = [["Instagram", "https://instagram.com/withusind"]];
   var f = $("#site-footer");
   if (f) {
     f.className = "site-footer"; f.setAttribute("role", "contentinfo");
     f.innerHTML = '<div class="wrap"><div class="foot-grid"><div><img src="' + base + 'assets/img/logo.png" width="114" height="45" alt="WithUs Indonesia">' +
       '<p class="muted" style="margin-top:14px">' + bi("Bridging Global Creative Vision with Indonesian Entertainment.", "Menjembatani Visi Kreatif Global dengan Industri Hiburan Indonesia.") + "</p>" +
       '<div class="socials">' + SOC.map(function (s) {
-        return s[1] === "#" ? '<span title="[ISI] URL ' + s[0] + '" aria-label="' + s[0] + ' [ISI]">' + icon(s[0]) + "</span>" : '<a href="' + s[1] + '" rel="noopener" target="_blank" aria-label="' + s[0] + '">' + icon(s[0]) + "</a>";
+        return '<a href="' + s[1] + '" rel="noopener" target="_blank" aria-label="' + s[0] + '">' + icon(s[0]) + "</a>";
       }).join("") + "</div></div>" +
-      '<div><h3>' + bi("Contact", "Kontak") + '</h3><ul><li><a href="mailto:admin@withusindonesia.com">admin@withusindonesia.com</a><button class="copy-btn" type="button" data-copy="admin@withusindonesia.com">Copy</button></li><li>WhatsApp: <span class="isi">[ISI]</span></li>' +
+      '<div><h3>' + bi("Contact", "Kontak") + '</h3><ul><li><a href="mailto:admin@withusindonesia.com">admin@withusindonesia.com</a><button class="copy-btn" type="button" data-copy="admin@withusindonesia.com">Copy</button></li>' +
+      '<li>WhatsApp: <a href="https://wa.me/828170288258" target="_blank" rel="noopener">+82 817-0288-258</a></li>' +
       "<li>Treasury Tower Lt. 5 Unit J, District 8 SCBD, Jakarta Selatan</li><li>PT Harpa Ananta Sora</li></ul></div>" +
       '<div><h3>' + bi("Company", "Perusahaan") + '</h3><ul><li><a href="' + base + 'privacy-policy.html">Privacy Policy</a></li><li><a href="' + base + 'terms.html">Terms</a></li>' +
       '<li><a href="mailto:admin@withusindonesia.com?subject=Media%20Kit%20Request">Media Kit</a></li></ul></div></div>' +
@@ -221,17 +222,28 @@
   }
   function eventHTML(e, i) {
     var prev = EVENTS[(i + EVENTS.length - 1) % EVENTS.length], next = EVENTS[(i + 1) % EVENTS.length];
+    var formatBadge = e.format ? '<span class="badge">' + esc(tr(e.format)) + '</span>' : '';
+    var partnersHtml = (e.partners && e.partners.length) ?
+      '<div class="m-partners-wrap" style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--line)"><small class="eyebrow" style="display:block;margin-bottom:8px;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)">' + bi("Official Partners &amp; Credits", "Mitra Resmi &amp; Kredit") + '</small><div class="tags" style="display:flex;flex-wrap:wrap;gap:8px">' + e.partners.map(function(p) { return '<span class="tag" style="background:rgba(255,255,255,.06);border:1px solid var(--line);padding:4px 10px;border-radius:999px;font-size:.82rem;color:var(--text)">' + esc(p) + '</span>'; }).join("") + '</div></div>' : '';
+    var narrativeHtml = '';
+    if (e.howItHappened) {
+      narrativeHtml = '<h3 class="m-h">' + bi("How it happened", "Bagaimana ini terjadi") + '</h3>' +
+        '<div class="m-narrative glass" style="padding:22px 26px;border-radius:18px;margin-top:1rem;line-height:1.75;color:var(--text)"><p>' + esc(tr(e.howItHappened)) + '</p></div>';
+    } else if (e.story && e.story.some(function (s) { return tr(s.title) !== "[ISI]" || tr(s.body) !== "[ISI]"; })) {
+      narrativeHtml = '<h3 class="m-h">' + bi("How it happened", "Bagaimana ini terjadi") + '</h3><ol class="m-story">' +
+        e.story.map(function (s) { return '<li><span class="ph">' + esc(s.phase) + "</span><b>" + mark(tr(s.title)) + '</b><span class="muted">' + mark(tr(s.body)) + "</span></li>"; }).join("") + "</ol>";
+    }
     return '<div class="m-grid"><div class="m-poster"><img src="' + e.poster + '" alt="' + esc(e.name) + ' poster" width="600" height="800"></div><div class="m-info">' +
-      (e.status === "upcoming" ? '<p class="eyebrow keep">' + bi("Upcoming", "Mendatang") + "</p>" : "") + '<h2 id="m-title">' + mark(e.name) + "</h2>" +
-      (e.subtitle ? '<p class="lead" style="margin-top:.6rem">' + mark(e.subtitle) + "</p>" : "") +
-      '<dl class="ev-facts"><div><dt>' + bi("Date", "Tanggal") + "</dt><dd>" + mark(e.date) + "</dd></div><div><dt>Venue</dt><dd>" + mark(e.venue) + ", " + esc(e.city) + "</dd></div></dl>" +
-      (e.ticketUrl ? '<div class="btns"><a class="btn primary" href="' + esc(e.ticketUrl) + '" rel="noopener" target="_blank">' + bi("Get Tickets (official)", "Beli Tiket (resmi)") + "</a></div>" : "") +
-      '<p class="muted m-sum">' + mark(tr(e.summary)) + "</p>" +
-      (e.partners.length ? '<p class="m-partners"><b>' + bi("Credits", "Kredit") + "</b> " + e.partners.map(esc).join(" · ") + "</p>" : "") + "</div></div>" +
-      '<h3 class="m-h">' + bi("How it happened", "Bagaimana ini terjadi") + '</h3>' + (!e.story.some(function (s) { return tr(s.title) !== "[ISI]" || tr(s.body) !== "[ISI]"; }) ? '<p class="muted">' + mark("[ISI: cerita per fase: Announcement, Ticketing, Production, Show Day, Aftermath]") + "</p>" : '<ol class="m-story">' +
-      e.story.map(function (s) { return '<li><span class="ph">' + esc(s.phase) + "</span><b>" + mark(tr(s.title)) + '</b><span class="muted">' + mark(tr(s.body)) + "</span></li>"; }).join("") + "</ol>") +
+      '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">' + (e.status === "upcoming" ? '<p class="eyebrow keep" style="margin:0">' + bi("Upcoming", "Mendatang") + "</p>" : "") + formatBadge + '</div>' +
+      '<h2 id="m-title">' + mark(e.name) + "</h2>" +
+      (e.subtitle ? '<p class="lead" style="margin-top:.4rem;color:var(--gold)">' + mark(e.subtitle) + "</p>" : "") +
+      '<dl class="ev-facts" style="margin-top:1.2rem"><div><dt>' + bi("Date", "Tanggal") + "</dt><dd>" + mark(e.date) + "</dd></div><div><dt>Venue</dt><dd>" + mark(e.venue) + ", " + esc(e.city) + "</dd></div></dl>" +
+      (e.ticketUrl ? '<div class="btns" style="margin-top:1rem"><a class="btn primary" href="' + esc(e.ticketUrl) + '" rel="noopener" target="_blank">' + bi("Get Tickets (official)", "Beli Tiket (resmi)") + "</a></div>" : "") +
+      '<p class="muted m-sum" style="margin-top:1.2rem;font-size:1.05rem;line-height:1.7">' + mark(tr(e.summary)) + "</p>" +
+      partnersHtml + "</div></div>" +
+      narrativeHtml +
       '<h3 class="m-h">' + bi("By the numbers", "Dalam angka") + '</h3><div class="stats">' + e.stats.map(function (s) { return '<div class="stat glass"><b>' + mark(s.value) + "</b><span>" + esc(tr(s.label)) + "</span></div>"; }).join("") + "</div>" +
-      '<h3 class="m-h">' + bi("Gallery", "Galeri") + '</h3><div class="strip">' + e.gallery.map(function (g) { return '<img src="' + g.src + '" alt="' + esc(g.alt) + '" loading="lazy" width="450" height="600" onload="this.classList.add(\'ld\')">'; }).join("") + "</div>" +
+      (e.gallery && e.gallery.length > 1 ? '<h3 class="m-h">' + bi("Gallery", "Galeri") + '</h3><div class="strip">' + e.gallery.map(function (g) { return '<img src="' + g.src + '" alt="' + esc(g.alt) + '" loading="lazy" width="450" height="600" onload="this.classList.add(\'ld\')">'; }).join("") + "</div>" : "") +
       '<div class="m-nav"><button class="btn" data-go="' + prev.slug + '"><svg class="ico" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>' + mark(prev.name) + '</button><button class="btn" data-go="' + next.slug + '">' + mark(next.name) + '<svg class="ico" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>';
   }
   function renderModal() {
