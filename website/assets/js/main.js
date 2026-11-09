@@ -261,32 +261,88 @@
   /* ==========================================================================
      3. REACT BITS: <CircularCarousel /> COMPONENT FOR EVENTS
      ========================================================================== */
+  const PRESETS = {
+    cylinder: {
+      axis: "y",
+      tilt: -5,
+      perspective: 2500,
+      curve: 1,
+      spread: 1,
+      inward: false,
+      billboard: false,
+      backfaces: true,
+      window: 0
+    },
+    orbit: {
+      axis: "y",
+      tilt: -16,
+      perspective: 1500,
+      curve: 0,
+      spread: 1.45,
+      inward: false,
+      billboard: true,
+      backfaces: false,
+      window: 0
+    },
+    wheel: {
+      axis: "x",
+      tilt: 0,
+      perspective: 1800,
+      curve: 0,
+      spread: 1,
+      inward: false,
+      billboard: false,
+      backfaces: true,
+      window: 1.7
+    },
+    panorama: {
+      axis: "y",
+      tilt: 0,
+      perspective: 1800,
+      curve: 1,
+      spread: 1,
+      inward: true,
+      billboard: false,
+      backfaces: false,
+      window: 0
+    }
+  };
+
   class CircularCarousel {
     constructor(container, options = {}) {
       this.container = container;
       this.options = Object.assign({
-        preset: "cylinder",
-        cardWidth: 280,
+        preset: "panorama",
+        intro: "rise",
+        cardWidth: 220,
         aspectRatio: 0.75,
         speed: 14,
-        gap: 32,
-        parallax: 0.26,
-        curve: 0.5,
+        gap: 25,
+        tilt: 0,
+        perspective: 1800,
+        captions: true,
+        parallax: 0.28,
         depthFade: 0.55,
         fadeColor: "#070709",
-        innerShade: 0.5,
-        cornerRadius: 18,
+        innerShade: 0.6,
+        cornerRadius: 14,
         autoplay: "drift",
         draggable: true,
+        momentum: 0.6,
         snap: true,
         pauseOnHover: true,
         focusOnClick: true
       }, options);
 
+      this.layout = PRESETS[this.options.preset] || PRESETS.panorama;
+      this.axis = this.layout.axis;
+      this.tiltValue = this.options.tilt !== undefined ? this.options.tilt : this.layout.tilt;
+      this.curveValue = this.options.curve !== undefined ? this.options.curve : this.layout.curve;
+
       this.rawItems = window.EVENTS || [];
       if (!this.rawItems.length) return;
 
-      // Duplicate items to 6 cards for a complete 360-degree cylinder if < 5 items
+      // Duplicate items to 6 cards for an evenly spaced 360-degree cylinder
       this.items = this.rawItems.length < 5 ? [...this.rawItems, ...this.rawItems] : this.rawItems;
       this.count = this.items.length;
       this.step = 360 / this.count;
@@ -296,11 +352,17 @@
       this.velocity = 0;
       this.isDragging = false;
       this.isHovered = false;
-      this.lastPointerX = 0;
+      this.lastPointerPos = 0;
       this.lastTime = 0;
       this.activeIndex = 0;
+      this.introStart = performance.now();
+      this.introDone = false;
+      this.holdUntil = 0;
 
       this.pointer = { x: 0, y: 0, inside: false };
+      this.yaw = 0;
+      this.pitch = 0;
+
       this.buildDOM();
       this.computeDimensions();
       this.bindEvents();
@@ -310,7 +372,7 @@
     buildDOM() {
       this.container.classList.add("circular-carousel");
       this.container.setAttribute("data-shape", this.options.preset);
-      this.container.setAttribute("data-axis", "x");
+      this.container.setAttribute("data-axis", this.axis);
       if (this.options.draggable) this.container.setAttribute("data-draggable", "true");
       this.container.tabIndex = 0;
 
@@ -367,31 +429,59 @@
       const w = rect.width || 1200;
       const h = rect.height || 560;
 
-      // Scale card width down on smaller mobile screens
+      // Card sizing with mobile adaptation
       let cw = this.options.cardWidth;
-      if (w < 480) cw = Math.min(cw, w * 0.65);
-      else if (w < 768) cw = Math.min(cw, w * 0.45);
+      if (w < 480) cw = Math.min(cw, w * 0.72);
+      else if (w < 768) cw = Math.min(cw, w * 0.52);
 
       const ch = cw / this.options.aspectRatio;
       this.cardW = Math.round(cw);
       this.cardH = Math.round(ch);
+      const along = this.axis === "x" ? this.cardH : this.cardW;
 
-      // 3D cylinder radius based on cards and gap
-      this.radius = Math.max(this.cardW * 1.1, (this.cardW + this.options.gap) / (2 * Math.tan(Math.PI / this.count)));
-      this.perspective = Math.max(1000, this.radius * 2.2);
+      // Radius calculation from React Bits
+      const n = Math.max(this.count, 3);
+      const pitch = (along + this.options.gap) * this.layout.spread;
+      const chord = pitch / (2 * Math.sin(Math.PI / n));
+      const arc = (n * pitch) / (2 * Math.PI);
+      this.radius = Math.max(chord + (arc - chord) * this.curveValue, along * 0.6);
 
-      this.container.style.perspective = `${this.perspective}px`;
+      // Perspective for camera
+      this.perspective = this.layout.inward
+        ? this.radius
+        : (this.options.perspective || this.layout.perspective || 1800);
+
+      this.stage.style.perspective = `${this.perspective}px`;
       this.container.style.setProperty("--cc-radius", `${this.options.cornerRadius}px`);
       this.container.style.setProperty("--cc-fade", this.options.fadeColor);
       this.container.style.setProperty("--cc-inner", this.options.innerShade);
 
+      // Fit calculation to ensure cards are framed perfectly
+      const room = this.options.captions ? 76 : 0;
+      const viewW = w * 0.94;
+      const viewH = (h - room) * 0.92;
+      let fit = 1;
+      if (this.layout.inward) {
+        const spanX = Math.max(this.cardW * 2.8, 1);
+        const spanY = Math.max(this.cardH, 1);
+        fit = Math.min(1, viewW / spanX, viewH / spanY);
+      } else {
+        fit = Math.min(1, viewW / (this.radius * 2.2), viewH / (this.cardH * 1.2));
+      }
+      this.fit = fit;
+      this.drop = (h / fit) * 0.55 + this.cardH;
+      this.stage.style.transform = `scale(${fit})`;
+
+      // Configure each card dimensions
       this.cards.forEach((card, i) => {
-        const angle = i * this.step;
+        const base = i * this.step;
         card.style.width = `${this.cardW}px`;
         card.style.height = `${this.cardH}px`;
         card.style.left = `${-this.cardW / 2}px`;
         card.style.top = `${-this.cardH / 2}px`;
-        card.style.transform = `rotateY(${angle}deg) translateZ(${this.radius}px)`;
+
+        const z = this.layout.inward ? -this.radius : this.radius;
+        card.style.transform = `rotateY(${base}deg) translateZ(${z}px)`;
 
         const frame = $(".circular-carousel__frame", card);
         if (frame) {
@@ -409,48 +499,61 @@
 
     bindEvents() {
       window.addEventListener("resize", () => this.computeDimensions());
+      const dragSign = this.layout.inward ? -1 : 1;
 
       if (this.options.draggable) {
         this.container.addEventListener("pointerdown", e => {
+          if (e.button !== 0) return;
           this.isDragging = true;
           this.container.setAttribute("data-dragging", "true");
-          this.lastPointerX = e.clientX;
+          this.lastPointerPos = e.clientX;
           this.lastTime = performance.now();
           this.velocity = 0;
-          this.container.setPointerCapture(e.pointerId);
+          try { this.container.setPointerCapture(e.pointerId); } catch (_) {}
         });
 
         this.container.addEventListener("pointermove", e => {
           const rect = this.container.getBoundingClientRect();
-          this.pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-          this.pointer.y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+          this.pointer.x = Math.max(-1, Math.min(1, ((e.clientX - rect.left) / rect.width) * 2 - 1));
+          this.pointer.y = Math.max(-1, Math.min(1, ((e.clientY - rect.top) / rect.height) * 2 - 1));
           this.pointer.inside = true;
 
           if (!this.isDragging) return;
           const now = performance.now();
           const dt = Math.max(1, now - this.lastTime);
-          const dx = e.clientX - this.lastPointerX;
-          this.lastPointerX = e.clientX;
+          const dx = e.clientX - this.lastPointerPos;
+          this.lastPointerPos = e.clientX;
           this.lastTime = now;
 
-          const degPerPx = 180 / (Math.PI * this.radius);
-          const dAngle = dx * degPerPx;
-          this.angle += dAngle;
-          this.velocity = dAngle / dt;
+          const perPixel = 180 / (Math.PI * this.radius * (this.fit || 1));
+          const delta = dx * perPixel * dragSign;
+          this.angle += delta;
+          this.velocity = (delta / dt) * 1000;
         });
 
         const onUp = () => {
           if (!this.isDragging) return;
           this.isDragging = false;
           this.container.removeAttribute("data-dragging");
+          this.holdUntil = performance.now() + 1800;
           if (this.options.snap) {
-            this.targetAngle = Math.round(this.angle / this.step) * this.step;
+            this.targetAngle = Math.round((this.angle + this.velocity * 0.15) / this.step) * this.step;
           }
         };
 
         this.container.addEventListener("pointerup", onUp);
         this.container.addEventListener("pointercancel", onUp);
       }
+
+      this.container.addEventListener("wheel", e => {
+        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : 0;
+        if (!delta) return;
+        e.preventDefault();
+        const perPixel = 180 / (Math.PI * this.radius * (this.fit || 1));
+        this.angle -= delta * perPixel * dragSign;
+        this.velocity = -delta * perPixel * dragSign * 20;
+        this.holdUntil = performance.now() + 1500;
+      }, { passive: false });
 
       if (this.options.pauseOnHover) {
         this.container.addEventListener("pointerenter", () => { this.isHovered = true; });
@@ -468,13 +571,12 @@
         const normAngle = ((this.angle % 360) + 360) % 360;
         const normTarget = ((cardAngle % 360) + 360) % 360;
 
-        // If card is front-most or clicked directly, open modal
         const slug = card.dataset.slug;
-        if (Math.abs(normAngle - normTarget) < 15 || Math.abs(normAngle - normTarget) > 345) {
+        if (Math.abs(normAngle - normTarget) < 18 || Math.abs(normAngle - normTarget) > 342) {
           if (window.openEventModal) window.openEventModal(slug);
         } else {
-          // Rotate clicked card to front
           this.targetAngle = cardAngle;
+          this.holdUntil = performance.now() + 2500;
         }
       });
 
@@ -489,62 +591,97 @@
     }
 
     stepBy(delta) {
-      const cur = Math.round(this.angle / this.step) * this.step;
-      this.targetAngle = cur + delta * this.step;
+      const dragSign = this.layout.inward ? -1 : 1;
+      const cur = this.targetAngle !== undefined ? this.targetAngle : Math.round(this.angle / this.step) * this.step;
+      this.targetAngle = cur - delta * this.step * dragSign;
+      this.holdUntil = performance.now() + 2500;
     }
 
     startLoop() {
-      let lastTime = performance.now();
-      const loop = (now) => {
-        const dt = (now - lastTime) / 1000;
-        lastTime = now;
+      let last = performance.now();
+      const loop = now => {
+        const dt = (now - last) / 1000;
+        last = now;
+
+        const paused = (this.options.pauseOnHover && this.isHovered) || this.isDragging || now < this.holdUntil;
 
         if (!this.isDragging) {
-          if (Math.abs(this.velocity) > 0.01) {
-            this.angle += this.velocity * dt * 1000;
-            this.velocity *= 0.94; // momentum dampening
-            if (Math.abs(this.velocity) <= 0.01 && this.options.snap) {
+          if (Math.abs(this.velocity) > 0.05) {
+            this.angle += this.velocity * dt;
+            this.velocity *= Math.pow(0.2, dt);
+            if (Math.abs(this.velocity) <= 0.05 && this.options.snap) {
               this.targetAngle = Math.round(this.angle / this.step) * this.step;
             }
-          } else if (this.options.snap && this.targetAngle !== undefined) {
-            // Smoothly ease to snapped target card
-            this.angle += (this.targetAngle - this.angle) * Math.min(1, dt * 8);
-          } else if (this.options.autoplay === "drift" && !this.isHovered && !reduce) {
-            this.angle -= this.options.speed * dt;
+          } else if (this.options.snap && this.targetAngle !== undefined && Math.abs(this.targetAngle - this.angle) > 0.01) {
+            this.angle += (this.targetAngle - this.angle) * Math.min(1, dt * 7);
+          } else if (this.options.autoplay === "drift" && !paused && !reduce) {
+            const dragSign = this.layout.inward ? -1 : 1;
+            this.angle -= this.options.speed * dt * dragSign;
           }
         }
 
-        this.render();
+        this.render(now);
         requestAnimationFrame(loop);
       };
       requestAnimationFrame(loop);
     }
 
-    render() {
+    render(now) {
+      const dt = this.lastTime ? Math.min((now - this.lastTime) / 1000, 0.05) : 1 / 60;
+      const elapsed = this.introStart ? now - this.introStart : 0;
+      if (elapsed > 1800) this.introDone = true;
+
+      // Parallax smooth interpolation
+      const ease = 1 - Math.exp(-dt / 0.35);
       const aimYaw = this.pointer.inside ? this.pointer.x * this.options.parallax * 9 : 0;
       const aimPitch = this.pointer.inside ? -this.pointer.y * this.options.parallax * 6 : 0;
+      this.yaw += (aimYaw - this.yaw) * ease;
+      this.pitch += (aimPitch - this.pitch) * ease;
 
-      this.camera.style.transform = `rotateX(${aimPitch}deg) rotateY(${aimYaw}deg)`;
-      this.ring.style.transform = `translateZ(${-this.radius}px) rotateY(${this.angle}deg)`;
+      // Camera and ring transforms
+      if (this.layout.inward) {
+        this.camera.style.transform = `translate3d(0, 0, ${this.perspective - 1}px) rotateX(${this.tiltValue + this.pitch}deg) rotateY(${this.yaw}deg)`;
+        this.ring.style.transform = `rotateY(${this.angle}deg)`;
+      } else {
+        this.camera.style.transform = `translate3d(0, 0, ${-this.radius}px) rotateX(${this.tiltValue + this.pitch}deg) rotateY(${this.yaw}deg)`;
+        this.ring.style.transform = `rotateY(${this.angle}deg)`;
+      }
 
-      // Depth fade and blur distant cards
+      // Card positioning, intro rise effect, and depth fade
       this.cards.forEach((card, i) => {
-        const cardAngle = i * this.step + this.angle;
-        const normAngle = ((((cardAngle + 180) % 360) + 360) % 360) - 180;
-        const absAngle = Math.abs(normAngle);
+        const base = i * this.step;
+        const world = ((((base + this.angle) % 360) + 540) % 360) - 180;
+        const absWorld = Math.abs(world);
 
-        const fade = Math.min(1, absAngle / 120);
-        card.style.setProperty("--cc-depth", (fade * this.options.depthFade).toFixed(2));
+        // Intro 'rise' animation from below
+        let lift = 0;
+        if (!this.introDone && this.options.intro === "rise" && !reduce) {
+          const delay = (absWorld / 180) * 480;
+          const cardElapsed = Math.max(0, elapsed - delay);
+          const p = 1 - Math.pow(1 - Math.min(1, cardElapsed / 900), 5); // easeOutQuint
+          lift = (1 - p) * (this.drop || 300);
+        }
 
-        if (absAngle > 105) {
-          card.style.visibility = "hidden";
+        const z = this.layout.inward ? -this.radius : this.radius;
+        let tf = `rotateY(${base}deg) translateZ(${z}px)`;
+        if (lift) tf += ` translateY(${lift}px)`;
+        card.style.transform = tf;
+
+        // Visibility & depth fade
+        if (this.layout.inward) {
+          card.style.visibility = absWorld > 86 ? "hidden" : "";
+          const facing = Math.cos(world * Math.PI / 180);
+          const fade = 0.42 * Math.pow((1 - facing) / 2, 0.9);
+          card.style.setProperty("--cc-depth", fade.toFixed(3));
         } else {
-          card.style.visibility = "visible";
-          card.style.filter = `blur(${(fade * 4).toFixed(1)}px) brightness(${(1 - fade * 0.4).toFixed(2)})`;
+          card.style.visibility = absWorld > 105 ? "hidden" : "";
+          const facing = Math.cos(world * Math.PI / 180);
+          const fade = this.options.depthFade * Math.pow((1 - facing) / 2, 1.25);
+          card.style.setProperty("--cc-depth", fade.toFixed(3));
         }
       });
 
-      // Compute active front card
+      // Front-most card tracking
       const rawIdx = (Math.round(-this.angle / this.step) % this.count + this.count) % this.count;
       if (rawIdx !== this.activeIndex) {
         this.activeIndex = rawIdx;
@@ -1147,11 +1284,16 @@
     const carouselEl = $("#ring-carousel");
     if (carouselEl) {
       window.CIRCULAR_CAROUSEL = new CircularCarousel(carouselEl, {
-        preset: "cylinder",
+        preset: "panorama",
+        intro: "rise",
+        cardWidth: 220,
+        aspectRatio: 0.75,
         speed: 14,
-        parallax: 0.28,
-        cardWidth: 300,
-        aspectRatio: 0.75
+        captions: true,
+        tilt: 0,
+        perspective: 1800,
+        gap: 25,
+        parallax: 0.28
       });
 
       const prevBtn = $("#carousel-btn-prev");
