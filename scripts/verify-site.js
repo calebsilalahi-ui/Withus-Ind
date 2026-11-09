@@ -189,6 +189,14 @@ async function main() {
     await cdp.send('Page.navigate', { url: `http://localhost:${PORT}/index.html` });
     await new Promise(r => setTimeout(r, 1000));
 
+    try {
+      const shot1 = await cdp.send('Page.captureScreenshot', { format: 'png' });
+      if (shot1 && shot1.data) {
+        fs.writeFileSync('/Users/caleb/.gemini/antigravity/brain/e875d6fe-61ac-4ab2-bf30-15fca9f052f0/header-desktop.png', Buffer.from(shot1.data, 'base64'));
+        console.log('  ✓ Screenshot captured: header-desktop.png');
+      }
+    } catch (_) {}
+
     // Test carousel config
     const carouselInfo = await cdp.eval(`(() => {
       const cc = window.CIRCULAR_CAROUSEL;
@@ -302,20 +310,94 @@ async function main() {
     } else {
       console.log('✓ Clicking See Event button opened the event modal.');
     }
+    // Test clicking an event picture inside the modal to open Lightbox
+    console.log('Testing event picture click to open Image Lightbox...');
+    await cdp.eval(`(() => {
+      const galleryImg = document.querySelector(".m-gallery img");
+      if (galleryImg) galleryImg.click();
+    })()`);
+    await new Promise(r => setTimeout(r, 400));
+    const lightboxOpen = await cdp.eval(`(() => {
+      const lb = document.getElementById("image-lightbox");
+      return lb && !lb.hidden && lb.classList.contains("show");
+    })()`);
+    console.log(`Image Lightbox open after picture click: ${lightboxOpen}`);
+    if (!lightboxOpen) {
+      console.error('FAIL: Clicking an event picture did NOT open the Image Lightbox!');
+      exitCode = 1;
+    } else {
+      console.log('✓ Clicking an event picture opened the Image Lightbox in full scale.');
+      try {
+        const shot2 = await cdp.send('Page.captureScreenshot', { format: 'png' });
+        if (shot2 && shot2.data) {
+          fs.writeFileSync('/Users/caleb/.gemini/antigravity/brain/e875d6fe-61ac-4ab2-bf30-15fca9f052f0/lightbox-preview.png', Buffer.from(shot2.data, 'base64'));
+          console.log('  ✓ Screenshot captured: lightbox-preview.png');
+        }
+      } catch (_) {}
+    }
+    await cdp.eval('window.closeImageLightbox && window.closeImageLightbox()');
+    await new Promise(r => setTimeout(r, 400));
+    await cdp.eval('document.getElementById("modal-close-btn")?.click()');
+    await new Promise(r => setTimeout(r, 400));
+
+    // Verify Header Logo and Navigation
+    const headerCheck = await cdp.eval(`(() => {
+      const logoImg = document.querySelector(".site-header .brand img");
+      const hasCenterNav = !!document.querySelector(".desktop-nav");
+      const menuBtn = document.querySelector("#sm-toggle-btn");
+      return {
+        logoSrc: logoImg ? logoImg.getAttribute("src") : "",
+        hasCenterNav,
+        hasMenuBtn: !!menuBtn
+      };
+    })()`);
+    console.log('Header Check:', headerCheck);
+    if (!headerCheck.logoSrc.includes("logo.png")) {
+      console.error('FAIL: Header logo is not pointing to logo.png!');
+      exitCode = 1;
+    } else {
+      console.log('✓ Header logo is using assets/img/logo.png');
+    }
+    if (headerCheck.hasCenterNav) {
+      console.error('FAIL: Center navigation (.desktop-nav) was not removed!');
+      exitCode = 1;
+    } else {
+      console.log('✓ Center navigation removed so visitors focus on the menu.');
+    }
+    if (!headerCheck.hasMenuBtn) {
+      console.error('FAIL: Menu toggle button is missing!');
+      exitCode = 1;
+    } else {
+      console.log('✓ Menu toggle button is present on the right.');
+    }
 
     // Check promoter-101.html specific structures
     console.log('\n--- Deep Testing promoter-101.html Structures ---');
     await cdp.send('Page.navigate', { url: `http://localhost:${PORT}/promoter-101.html` });
-    await new Promise(r => setTimeout(r, 800));
+    await new Promise(r => setTimeout(r, 1000));
+    await cdp.eval('window.scrollTo(0, 800)');
+    await new Promise(r => setTimeout(r, 400));
+
+    try {
+      const shot3 = await cdp.send('Page.captureScreenshot', { format: 'png' });
+      if (shot3 && shot3.data) {
+        fs.writeFileSync('/Users/caleb/.gemini/antigravity/brain/e875d6fe-61ac-4ab2-bf30-15fca9f052f0/promoter-101-redesigned.png', Buffer.from(shot3.data, 'base64'));
+        console.log('  ✓ Screenshot captured: promoter-101-redesigned.png');
+      }
+    } catch (_) {}
 
     const p101Check = await cdp.eval(`(() => {
       const pillars = document.querySelectorAll(".cost-pillars-grid .pillar-card");
       const table = document.querySelector(".table-wrap table.fin-table");
-      const rows = table ? table.querySelectorAll("tbody tr") : [];
+      const glossaryCards = document.querySelectorAll(".glossary-card");
+      const sourceCards = document.querySelectorAll(".source-card");
+      const faqCards = document.querySelectorAll(".faq-card");
       return {
         pillarsCount: pillars.length,
         hasTable: !!table,
-        rowsCount: rows.length
+        glossaryCount: glossaryCards.length,
+        sourcesCount: sourceCards.length,
+        faqCount: faqCards.length
       };
     })()`);
     console.log('Promoter 101 Check:', p101Check);
@@ -325,11 +407,17 @@ async function main() {
     } else {
       console.log('✓ Found 5 cost pillars on the primary row.');
     }
-    if (!p101Check.hasTable || p101Check.rowsCount < 8) {
-      console.error(`FAIL: Missing or incomplete financial table: ${p101Check.rowsCount} rows`);
+    if (p101Check.hasTable) {
+      console.error('FAIL: Financial architecture table was supposed to be removed per get rid.png!');
       exitCode = 1;
     } else {
-      console.log(`✓ Financial table present with ${p101Check.rowsCount} rows.`);
+      console.log('✓ Financial architecture table cleanly removed per get rid.png.');
+    }
+    if (p101Check.glossaryCount < 5 || p101Check.sourcesCount < 7 || p101Check.faqCount < 3) {
+      console.error('FAIL: Missing redesigned glossary, sources, or faq cards per Improve UI.png!');
+      exitCode = 1;
+    } else {
+      console.log(`✓ Redesigned UI present: ${p101Check.glossaryCount} glossary cards, ${p101Check.sourcesCount} source links, ${p101Check.faqCount} FAQ accordions.`);
     }
 
     cdp.close();

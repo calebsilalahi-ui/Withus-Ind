@@ -79,22 +79,9 @@
     headerEl.innerHTML = `
       <div class="wrap header-wrap">
         <a class="brand" href="${base}index.html" aria-label="WithUs Indonesia">
-          <img src="${base}assets/img/logo.svg" width="160" height="30" alt="WithUs Indonesia">
+          <img src="${base}assets/img/logo.png" width="138" height="54" alt="WithUs Indonesia">
         </a>
-        <nav class="desktop-nav" aria-label="Main Navigation">
-          <a href="${base}index.html" ${(location.pathname.endsWith("index.html") || location.pathname.endsWith("/")) ? 'aria-current="page"' : ''}>${bi("Home", "Beranda")}</a>
-          <a href="${base}index.html#events">${bi("Events", "Event")}</a>
-          <a href="${base}about.html" ${location.pathname.endsWith("about.html") ? 'aria-current="page"' : ''}>${bi("About", "Tentang")}</a>
-          <a href="${base}services.html" ${location.pathname.endsWith("services.html") ? 'aria-current="page"' : ''}>${bi("Services", "Layanan")}</a>
-          <a href="${base}promoter-101.html" ${location.pathname.endsWith("promoter-101.html") ? 'aria-current="page"' : ''}>Promoter 101</a>
-          <a href="${base}contact.html" ${location.pathname.endsWith("contact.html") ? 'aria-current="page"' : ''}>${bi("Contact", "Kontak")}</a>
-        </nav>
         <div class="header-actions">
-          <div class="lang" role="group" aria-label="Language">
-            <button data-l="id" aria-pressed="${lang() === 'id'}">ID</button>
-            <button data-l="en" aria-pressed="${lang() === 'en'}">EN</button>
-          </div>
-          <a class="btn primary header-cta" href="${base}contact.html">${bi("Work WithUs", "Bekerja dengan WithUs")}</a>
           <button class="sm-toggle" id="sm-toggle-btn" aria-label="Open Navigation Menu" aria-expanded="false" aria-controls="sm-panel">
             <span class="sm-toggle-textWrap">
               <span class="sm-toggle-textInner">
@@ -106,6 +93,11 @@
               <span class="sm-icon-line" id="sm-icon-bot" style="transform: translateY(4px)"></span>
             </span>
           </button>
+          <div class="lang" role="group" aria-label="Language">
+            <button data-l="id" aria-pressed="${lang() === 'id'}">ID</button>
+            <button data-l="en" aria-pressed="${lang() === 'en'}">EN</button>
+          </div>
+          <a class="btn primary header-cta" href="${base}contact.html">${bi("Work WithUs", "Bekerja dengan WithUs")}</a>
         </div>
       </div>
     `;
@@ -126,7 +118,7 @@
         <aside class="staggered-menu-panel" id="sm-panel">
           <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
             <a href="${base}index.html" class="sm-logo" aria-label="WithUs Indonesia">
-              <img src="${base}assets/img/logo.svg" width="160" height="30" alt="WithUs Indonesia">
+              <img src="${base}assets/img/logo.png" width="138" height="54" alt="WithUs Indonesia">
             </a>
             <div style="display:flex;align-items:center;gap:16px">
               <div class="lang sm-lang" role="group" aria-label="Language Switch">
@@ -637,7 +629,10 @@
           return;
         }
 
-        const card = e.target.closest(".circular-carousel__card");
+        let card = e.target.closest(".circular-carousel__card");
+        if (!card && e.clientX && e.clientY) {
+          card = doc.elementFromPoint(e.clientX, e.clientY)?.closest(".circular-carousel__card");
+        }
         if (!card) return;
         const idx = parseInt(card.dataset.index, 10);
         const cardAngle = -idx * this.step;
@@ -1174,10 +1169,104 @@
   /* ==========================================================================
      5. EVENT MODAL WITH GALLERY
      ========================================================================== */
+  /* ==========================================================================
+     5. EVENT MODAL WITH GALLERY & FULL-SCALE IMAGE LIGHTBOX
+     ========================================================================== */
   let openModalSlug = null;
   let closeTimeout = null;
   const modal = $("#ev-modal");
 
+  /* --- Image Lightbox (Full-Scale Photo Popup) --- */
+  let lightboxEl = null;
+  let lightboxGallery = [];
+  let lightboxIndex = 0;
+
+  function initImageLightbox() {
+    if (lightboxEl) return;
+    lightboxEl = doc.createElement("div");
+    lightboxEl.id = "image-lightbox";
+    lightboxEl.className = "image-lightbox";
+    lightboxEl.hidden = true;
+    lightboxEl.setAttribute("aria-hidden", "true");
+    lightboxEl.setAttribute("role", "dialog");
+    lightboxEl.setAttribute("aria-modal", "true");
+    lightboxEl.setAttribute("aria-label", "High Resolution Photo View");
+
+    lightboxEl.innerHTML = `
+      <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+      <button class="lightbox-close" id="lightbox-close-btn" aria-label="Close photo view">✕</button>
+      <button class="lightbox-nav lightbox-nav--prev" id="lightbox-prev-btn" aria-label="Previous photo">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="lightbox-content">
+        <img id="lightbox-img" class="lightbox-img" src="" alt="">
+        <div id="lightbox-caption" class="lightbox-caption"></div>
+      </div>
+      <button class="lightbox-nav lightbox-nav--next" id="lightbox-next-btn" aria-label="Next photo">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    `;
+    doc.body.appendChild(lightboxEl);
+
+    $("#lightbox-close-btn", lightboxEl).addEventListener("click", closeImageLightbox);
+    $("#lightbox-backdrop", lightboxEl).addEventListener("click", closeImageLightbox);
+    $("#lightbox-prev-btn", lightboxEl).addEventListener("click", () => stepImageLightbox(-1));
+    $("#lightbox-next-btn", lightboxEl).addEventListener("click", () => stepImageLightbox(1));
+  }
+
+  function openImageLightbox(images, startIndex = 0) {
+    initImageLightbox();
+    if (!images || !images.length) return;
+    lightboxGallery = images;
+    lightboxIndex = (startIndex + images.length) % images.length;
+
+    updateLightboxView();
+    lightboxEl.hidden = false;
+    lightboxEl.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => lightboxEl.classList.add("show"));
+  }
+
+  function updateLightboxView() {
+    if (!lightboxGallery.length || !lightboxEl) return;
+    const item = lightboxGallery[lightboxIndex];
+    const img = $("#lightbox-img", lightboxEl);
+    const cap = $("#lightbox-caption", lightboxEl);
+    const prevBtn = $("#lightbox-prev-btn", lightboxEl);
+    const nextBtn = $("#lightbox-next-btn", lightboxEl);
+
+    if (img) {
+      img.src = item.src;
+      img.alt = item.alt || "Event production photo";
+    }
+    if (cap) {
+      const counter = lightboxGallery.length > 1 ? ` (${lightboxIndex + 1}/${lightboxGallery.length})` : "";
+      cap.textContent = (item.alt || "Official Production Gallery") + counter;
+    }
+    if (prevBtn && nextBtn) {
+      prevBtn.style.display = lightboxGallery.length > 1 ? "grid" : "none";
+      nextBtn.style.display = lightboxGallery.length > 1 ? "grid" : "none";
+    }
+  }
+
+  function stepImageLightbox(delta) {
+    if (lightboxGallery.length <= 1) return;
+    lightboxIndex = (lightboxIndex + delta + lightboxGallery.length) % lightboxGallery.length;
+    updateLightboxView();
+  }
+
+  function closeImageLightbox() {
+    if (!lightboxEl || lightboxEl.hidden) return;
+    lightboxEl.classList.remove("show");
+    setTimeout(() => {
+      lightboxEl.hidden = true;
+      lightboxEl.setAttribute("aria-hidden", "true");
+    }, 280);
+  }
+
+  window.openImageLightbox = openImageLightbox;
+  window.closeImageLightbox = closeImageLightbox;
+
+  /* --- Event Modal Handling --- */
   function openEventModal(slug) {
     const event = (window.EVENTS || []).find(e => e.slug === slug);
     if (!event || !modal) return;
@@ -1219,14 +1308,14 @@
     const partnersHtml = (event.partners || []).map(p => `<span>${p}</span>`).join(" · ");
 
     const galleryHtml = (event.gallery || []).map(g => `
-      <img src="${g.src}" alt="${esc(g.alt)}" loading="lazy">
+      <img src="${g.src}" alt="${esc(g.alt)}" loading="lazy" class="zoomable-event-photo" title="Click to view full size">
     `).join("");
 
     card.innerHTML = `
       <button class="modal-x" id="modal-close-btn" aria-label="Close modal">✕</button>
       <div class="m-grid">
         <div class="m-poster">
-          <img src="${event.poster}" alt="${esc(event.name)}">
+          <img src="${event.poster}" alt="${esc(event.name)}" class="zoomable-event-photo" title="Click to view full size">
         </div>
         <div class="m-info">
           <div class="badge" style="margin-bottom:12px">${tr(event.format)}</div>
@@ -1250,6 +1339,21 @@
       </div>
     `;
 
+    const allEventImages = [
+      { src: event.poster, alt: `${event.name} Official Poster` },
+      ...(event.gallery || [])
+    ];
+
+    const posterImg = $(".m-poster img", card);
+    if (posterImg) {
+      posterImg.addEventListener("click", () => openImageLightbox(allEventImages, 0));
+    }
+
+    const galleryImgs = $$(".m-gallery img", card);
+    galleryImgs.forEach((img, idx) => {
+      img.addEventListener("click", () => openImageLightbox(allEventImages, idx + 1));
+    });
+
     const closeBtn = $("#modal-close-btn", card);
     if (closeBtn) closeBtn.addEventListener("click", closeEventModal);
   }
@@ -1263,10 +1367,24 @@
 
   if (modal) {
     $(".modal-bg", modal)?.addEventListener("click", closeEventModal);
-    doc.addEventListener("keydown", e => {
-      if (e.key === "Escape" && !modal.hidden) closeEventModal();
-    });
   }
+
+  doc.addEventListener("keydown", e => {
+    if (lightboxEl && !lightboxEl.hidden) {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        closeImageLightbox();
+      } else if (e.key === "ArrowLeft") {
+        stepImageLightbox(-1);
+      } else if (e.key === "ArrowRight") {
+        stepImageLightbox(1);
+      }
+      return;
+    }
+    if (e.key === "Escape" && modal && !modal.hidden) {
+      closeEventModal();
+    }
+  });
 
   /* ==========================================================================
      6. GSAP SCROLL & REVEAL INITIALIZATION
@@ -1374,7 +1492,7 @@
         <div class="foot-main-grid">
           <div class="foot-col foot-brand">
             <a class="brand" href="${base}index.html" aria-label="WithUs Indonesia">
-              <img src="${base}assets/img/logo.svg" width="160" height="30" alt="WithUs Indonesia" loading="lazy">
+              <img src="${base}assets/img/logo.png" width="145" height="57" alt="WithUs Indonesia" loading="lazy">
             </a>
             <p class="foot-tagline">
               ${bi("Bridging Global Creative Vision with Indonesian Entertainment", "Menjembatani Visi Kreatif Global dengan Industri Hiburan Indonesia")}
