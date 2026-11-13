@@ -1704,15 +1704,13 @@ html[data-lang="en"] [lang="id"], html[data-lang="id"] [lang="en"] { display: no
   --cc-radius: 18px;
   --cc-inner: 0.6;
 }
-.circular-carousel__card {
-  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-.circular-carousel__card:hover, .circular-carousel__card.is-active {
-  border-color: var(--brand);
-  box-shadow: 0 16px 45px -8px var(--brand-glow);
-}
+/* No shadow/border on the 3D card container: it flattens preserve-3d and makes slices flicker on phones.
+   The active card is marked on its own slices instead. */
+.circular-carousel__card { box-shadow: none; border: 0; }
+.circular-carousel__card.is-active .circular-carousel__tile::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-top: 2px solid var(--brand); border-bottom: 2px solid var(--brand); border-radius: inherit; }
+.circular-carousel__card.is-active .circular-carousel__tile:first-child::after { border-left: 2px solid var(--brand); }
+.circular-carousel__card.is-active .circular-carousel__tile:last-child::after { border-right: 2px solid var(--brand); }
+.circular-carousel__tile { will-change: transform; }
 .circular-carousel__caption {
   position: absolute;
   left: 0;

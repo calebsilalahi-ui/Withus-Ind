@@ -408,7 +408,7 @@
       this.captionSub = $(".circular-carousel__subtitle", this.container);
       this.captionCount = $(".circular-carousel__count", this.container);
 
-      const TILES = 8;
+      const TILES = this.tileCount = (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768) ? 4 : 8;
       this.cards = [];
       this.items.forEach((item, i) => {
         const card = doc.createElement("div");
@@ -490,7 +490,7 @@
       this.stage.style.transform = `translateY(${stageOffsetY}px) scale(${fit})`;
 
       // Configure each card dimensions and bendable sliced tiles
-      const TILES = 8;
+      const TILES = this.tileCount || 8;
       const tileW = this.cardW / TILES;
       const bend = this.cardW / Math.max(0.001, this.curveValue);
 
@@ -565,14 +565,17 @@
           this.lastPointerPos = e.clientX;
           this.lastTime = performance.now();
           this.velocity = 0;
+          this.dragStartCard = Math.round(this.angle / this.step) * this.step;
           try { this.container.setPointerCapture(e.pointerId); } catch (_) {}
         });
 
         this.container.addEventListener("pointermove", e => {
           const rect = this.container.getBoundingClientRect();
+          if (e.pointerType !== "mouse") { this.pointer.inside = false; } else {
           this.pointer.x = Math.max(-1, Math.min(1, ((e.clientX - rect.left) / rect.width) * 2 - 1));
           this.pointer.y = Math.max(-1, Math.min(1, ((e.clientY - rect.top) / rect.height) * 2 - 1));
           this.pointer.inside = true;
+          }
 
           if (!this.isDragging) return;
           const dist = Math.hypot(e.clientX - this.pointerStartX, e.clientY - this.pointerStartY);
@@ -605,7 +608,13 @@
             }, 120);
           }
           if (this.options.snap) {
-            this.targetAngle = Math.round((this.angle + this.velocity * 0.15) / this.step) * this.step;
+            // one swipe moves at most one card, then eases into place (no runaway spin)
+            const fling = Math.max(-this.step * 0.6, Math.min(this.step * 0.6, this.velocity * 0.12));
+            const nearest = this.dragStartCard !== undefined ? this.dragStartCard : Math.round(this.angle / this.step) * this.step;
+            let target = Math.round((this.angle + fling) / this.step) * this.step;
+            target = Math.max(nearest - this.step, Math.min(nearest + this.step, target));
+            this.targetAngle = target;
+            this.velocity = 0;
           }
         };
 
@@ -673,9 +682,15 @@
 
     startLoop() {
       let last = performance.now();
+      this.onScreen = true;
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(en => { this.onScreen = en[0].isIntersecting; }, { rootMargin: "100px" }).observe(this.container);
+      }
       const loop = now => {
-        const dt = (now - last) / 1000;
+        const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
+        this.frameDt = dt;
+        if (!this.onScreen || doc.hidden) { requestAnimationFrame(loop); return; }
 
         const paused = (this.options.pauseOnHover && this.isHovered) || this.isDragging || now < this.holdUntil;
 
@@ -701,7 +716,7 @@
     }
 
     render(now) {
-      const dt = this.lastTime ? Math.min((now - this.lastTime) / 1000, 0.05) : 1 / 60;
+      const dt = this.frameDt || 1 / 60;
       const elapsed = this.introStart ? now - this.introStart : 0;
       if (elapsed > 1800) this.introDone = true;
 
@@ -717,8 +732,9 @@
         this.camera.style.transform = `translate3d(0, 0, ${this.perspective - 1}px) rotateX(${this.tiltValue + this.pitch}deg) rotateY(${this.yaw}deg)`;
         this.ring.style.transform = `rotateY(${this.angle}deg)`;
       } else {
-        this.camera.style.transform = `translate3d(0, 0, ${-this.radius}px) rotateX(${this.tiltValue + this.pitch}deg) rotateY(${this.yaw}deg)`;
-        this.ring.style.transform = `rotateY(${this.angle}deg)`;
+        const cam = `translate3d(0, 0, ${-this.radius}px) rotateX(${(this.tiltValue + this.pitch).toFixed(2)}deg) rotateY(${this.yaw.toFixed(2)}deg)`;
+        if (this._cam !== cam) { this.camera.style.transform = cam; this._cam = cam; }
+        this.ring.style.transform = `rotateY(${this.angle.toFixed(3)}deg)`;
       }
 
       // Card positioning, intro rise effect, and depth fade
@@ -738,8 +754,8 @@
 
         const z = this.layout.inward ? -this.radius : this.radius;
         let tf = `rotateY(${base}deg) translateZ(${z}px)`;
-        if (lift) tf += ` translateY(${lift}px)`;
-        card.style.transform = tf;
+        if (lift) tf += ` translateY(${lift.toFixed(1)}px)`;
+        if (card._tf !== tf) { card.style.transform = tf; card._tf = tf; }
 
         // Visibility & depth fade
         if (this.layout.inward) {
@@ -749,12 +765,15 @@
           card.style.setProperty("--cc-depth", fade.toFixed(3));
         } else {
           // In cylinder preset, cards wrap the 3D ring with visible inner shaded faces
-          card.style.visibility = absWorld > 165 ? "hidden" : "";
+          // cards past the side are hidden: no back faces fighting the front ones
+          const vis = absWorld > 100 ? "hidden" : "";
+          if (card._vis !== vis) { card.style.visibility = vis; card._vis = vis; }
           const facing = Math.cos(world * Math.PI / 180);
           const fade = facing > 0
             ? this.options.depthFade * Math.pow((1 - facing), 1.2)
             : this.options.depthFade * 0.85;
-          card.style.setProperty("--cc-depth", Math.min(1, Math.max(0, fade)).toFixed(3));
+          const d = Math.min(1, Math.max(0, fade)).toFixed(2);
+          if (card._d !== d) { card.style.setProperty("--cc-depth", d); card._d = d; }
         }
       });
 
