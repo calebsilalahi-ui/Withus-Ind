@@ -69,6 +69,8 @@
     { label: "Email", url: "mailto:admin@withusindonesia.com" }
   ];
 
+  const currentPage = (location.pathname.split("/").pop() || "index.html");
+
   function initHeaderAndMenu() {
     const headerEl = $("#site-header");
     if (!headerEl) return;
@@ -141,7 +143,7 @@
               ${NAV_ITEMS.map((item, idx) => `
                 <li class="sm-panel-item">
                   <div class="sm-panel-itemWrap">
-                    <a href="${base}${item.href}" class="sm-panel-link" data-index="${idx}">
+                    <a href="${base}${item.href}" class="sm-panel-link" data-index="${idx}"${item.href === currentPage ? ' aria-current="page"' : ""}>
                       <span class="sm-panel-link-num">${item.num}</span>
                       <span class="sm-panel-link-text">${bi(item.titleEn, item.titleId)}</span>
                     </a>
@@ -161,6 +163,7 @@
         </aside>
       `;
       doc.body.appendChild(menuWrapper);
+      menuWrapper.inert = true;
     }
 
     let menuOpen = false;
@@ -181,6 +184,7 @@
         menuWrapper.removeAttribute("data-open");
       }
       menuWrapper.style.pointerEvents = menuOpen ? "auto" : "none";
+      menuWrapper.inert = !menuOpen;
 
       if (window.gsap && !reduce) {
         if (menuOpen) {
@@ -840,20 +844,20 @@
                 <h3 style="font-size:1.4rem;margin-bottom:6px">${bi("Select Project Scope", "Pilih Lingkup Proyek")}</h3>
                 <p style="color:var(--muted);font-size:0.95rem">${bi("Tell us how WithUs Indonesia can support your vision.", "Ceritakan bagaimana WithUs Indonesia dapat mendukung rencana Anda.")}</p>
               </div>
-              <div class="scope-grid">
-                <div class="scope-card is-selected" data-scope="Concert Touring & Promotion">
+              <div class="scope-grid" role="radiogroup" aria-label="Project scope">
+                <div class="scope-card is-selected" data-scope="Concert Touring & Promotion" role="radio" tabindex="0" aria-checked="true">
                   <h4>${bi("Concert Touring & Promotion", "Promotor & Tur Konser")}</h4>
                   <p>${bi("Full-scale live concert, fan-con or tour management across Jakarta arenas.", "Pengelolaan konser langsung, fan-con, atau tur di arena Jakarta.")}</p>
                 </div>
-                <div class="scope-card" data-scope="Artist Booking & Representation">
+                <div class="scope-card" data-scope="Artist Booking & Representation" role="radio" tabindex="0" aria-checked="false">
                   <h4>${bi("Artist Booking & Management", "Booking & Manajemen Artis")}</h4>
                   <p>${bi("Securing global Korean/international talent for domestic appearances.", "Menghadirkan artis global/Korea untuk kegiatan dan kampanye di Indonesia.")}</p>
                 </div>
-                <div class="scope-card" data-scope="IP Licensing & Exhibitions">
+                <div class="scope-card" data-scope="IP Licensing & Exhibitions" role="radio" tabindex="0" aria-checked="false">
                   <h4>${bi("IP Licensing & Exhibitions", "Lisensi IP & Pameran")}</h4>
                   <p>${bi("D'FESTA style pop-ups, entertainment showcases, and brand activations.", "Pameran eksklusif bergaya D'FESTA, aktivasi brand, dan lisensi IP hiburan.")}</p>
                 </div>
-                <div class="scope-card" data-scope="Production & Consultancy">
+                <div class="scope-card" data-scope="Production & Consultancy" role="radio" tabindex="0" aria-checked="false">
                   <h4>${bi("Technical Production Management", "Manajemen Produksi Teknis")}</h4>
                   <p>${bi("CAD technical plots, sound, lighting, rigging, and stage engineering.", "Perencanaan teknis CAD, tata suara, tata cahaya, rigging, dan panggung.")}</p>
                 </div>
@@ -870,20 +874,20 @@
               </div>
               <div class="input-grid">
                 <div class="field-group">
-                  <label>${bi("Full Name *", "Nama Lengkap *")}</label>
-                  <input type="text" id="step-name" placeholder="e.g. Min-woo Kim / Sarah Pratama" required>
+                  <label for="step-name">${bi("Full Name *", "Nama Lengkap *")}</label>
+                  <input type="text" id="step-name" autocomplete="name" aria-describedby="step-name-err" placeholder="e.g. Min-woo Kim / Sarah Pratama" required><p class="field-err" id="step-name-err" role="alert" hidden></p>
                 </div>
                 <div class="field-group">
-                  <label>${bi("Organization / Agency *", "Organisasi / Agensi *")}</label>
-                  <input type="text" id="step-org" placeholder="e.g. Entertainment Agency / Brand" required>
+                  <label for="step-org">${bi("Organization / Agency (optional)", "Organisasi / Agensi (opsional)")}</label>
+                  <input type="text" id="step-org" autocomplete="organization" aria-describedby="step-org-err" placeholder="e.g. Entertainment Agency / Brand">
                 </div>
                 <div class="field-group">
-                  <label>${bi("Email Address *", "Alamat Email *")}</label>
-                  <input type="email" id="step-email" placeholder="name@company.com" required>
+                  <label for="step-email">${bi("Email Address *", "Alamat Email *")}</label>
+                  <input type="email" id="step-email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" aria-describedby="step-email-err" placeholder="name@company.com" required><p class="field-err" id="step-email-err" role="alert" hidden></p>
                 </div>
                 <div class="field-group">
-                  <label>${bi("WhatsApp / Phone (with Country Code) *", "WhatsApp / Nomor Telepon *")}</label>
-                  <input type="tel" id="step-phone" placeholder="+62 / +82 ..." required>
+                  <label for="step-phone">${bi("WhatsApp / Phone (with Country Code) *", "WhatsApp / Nomor Telepon *")}</label>
+                  <input type="tel" id="step-phone" autocomplete="tel" inputmode="tel" aria-describedby="step-phone-err" placeholder="+62 / +82 ..." required><p class="field-err" id="step-phone-err" role="alert" hidden></p>
                 </div>
               </div>
             </div>
@@ -898,11 +902,11 @@
               </div>
               <div class="input-grid">
                 <div class="field-group">
-                  <label>${bi("Target Timeline / Quarter", "Target Waktu / Kuartal")}</label>
+                  <label for="step-date">${bi("Target Timeline / Quarter", "Target Waktu / Kuartal")}</label>
                   <input type="text" id="step-date" placeholder="e.g. Q3 2026 / November 2026">
                 </div>
                 <div class="field-group">
-                  <label>${bi("Preferred Venue Tier", "Pilihan Kapasitas Venue")}</label>
+                  <label for="step-venue">${bi("Preferred Venue Tier", "Pilihan Kapasitas Venue")}</label>
                   <select id="step-venue">
                     <option value="Arena / Stadium (5,000 - 15,000+ pax)">Arena / Stadium (Istora, Indonesia Arena, etc.)</option>
                     <option value="Mid-tier Dome / Hall (2,000 - 5,000 pax)">Mid-tier Dome / Hall (SPIKE Air Dome PIK 2, etc.)</option>
@@ -912,7 +916,7 @@
                 </div>
               </div>
               <div class="field-group">
-                <label>${bi("Estimated Budget Range", "Estimasi Kisaran Anggaran")}</label>
+                <label for="step-budget">${bi("Estimated Budget Range", "Estimasi Kisaran Anggaran")}</label>
                 <select id="step-budget">
                   <option value="Under $50,000 (< IDR 800 Juta)">Under $50,000 (< IDR 800 Juta)</option>
                   <option value="$50,000 - $150,000 (IDR 800 Jt - 2.4 Miliar)" selected>$50,000 - $150,000 (IDR 800 Jt - 2.4 Miliar)</option>
@@ -921,8 +925,8 @@
                 </select>
               </div>
               <div class="field-group">
-                <label>${bi("Project Brief / Message *", "Ringkasan Proyek / Pesan *")}</label>
-                <textarea id="step-message" placeholder="${lang() === 'id' ? 'Ceritakan mengenai artis, konsep pertunjukan, dan kebutuhan Anda...' : 'Tell us about the artist, concept, and required deliverables...'}" required></textarea>
+                <label for="step-message">${bi("Project Brief / Message *", "Ringkasan Proyek / Pesan *")}</label>
+                <textarea id="step-message" aria-describedby="step-message-err" placeholder="${lang() === 'id' ? 'Ceritakan mengenai artis, konsep pertunjukan, dan kebutuhan Anda...' : 'Tell us about the artist, concept, and required deliverables...'}" required></textarea><p class="field-err" id="step-message-err" role="alert" hidden></p>
               </div>
             </div>
           </div>
@@ -947,7 +951,7 @@
                   <span>${bi("Direct VIP Chat with Admin WithUs (+62 817-0288-258)", "Chat VIP Langsung dengan Admin WithUs (+62 817-0288-258)")}</span>
                 </a>
               </div>
-              <div id="form-feedback" style="display:none;padding:14px;border-radius:12px;margin-top:12px"></div>
+              <div id="form-feedback" role="alert" style="display:none;padding:14px;border-radius:12px;margin-top:12px"></div>
             </div>
           </div>
         </div>
@@ -977,11 +981,19 @@
       // Scope card selection
       const scopeCards = $$(".scope-card", this.container);
       scopeCards.forEach(card => {
-        card.addEventListener("click", () => {
-          scopeCards.forEach(c => c.classList.remove("is-selected"));
+        const pick = () => {
+          scopeCards.forEach(c => { c.classList.remove("is-selected"); c.setAttribute("aria-checked", "false"); });
           card.classList.add("is-selected");
+          card.setAttribute("aria-checked", "true");
           this.data.scope = card.dataset.scope;
-        });
+        };
+        card.addEventListener("click", pick);
+        card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+      });
+
+      ["step-name", "step-email", "step-phone", "step-message"].forEach(id => {
+        const el = $("#" + id, this.container);
+        if (el) el.addEventListener("input", () => { if (el.getAttribute("aria-invalid")) this.fieldError(id, ""); });
       });
 
       // Navigation buttons
@@ -1015,21 +1027,41 @@
       }
     }
 
+    fieldError(id, msg) {
+      const input = $("#" + id, this.container), err = $("#" + id + "-err", this.container);
+      if (!input || !err) return;
+      if (msg) { err.textContent = msg; err.hidden = false; input.setAttribute("aria-invalid", "true"); }
+      else { err.textContent = ""; err.hidden = true; input.removeAttribute("aria-invalid"); }
+    }
+
+    // Postel's law: accept loose input, store a clean version
+    normalizePhone(v) {
+      let p = v.replace(/[^\d+]/g, "");
+      if (/^0\d{8,}$/.test(p)) p = "+62" + p.slice(1);
+      else if (/^62\d{8,}$/.test(p)) p = "+" + p;
+      return p;
+    }
+
     validateStep(step) {
+      let firstBad = null;
+      const check = (id, ok, msg) => { this.fieldError(id, ok ? "" : msg); if (!ok && !firstBad) firstBad = id; };
       if (step === 1) {
-        const name = $("#step-name", this.container).value.trim();
-        const email = $("#step-email", this.container).value.trim();
-        const phone = $("#step-phone", this.container).value.trim();
-        if (!name) { alert(tr({ en: "Please enter your name.", id: "Mohon masukkan nama Anda." })); return false; }
-        if (!email || !email.includes("@")) { alert(tr({ en: "Please enter a valid email.", id: "Mohon masukkan alamat email yang valid." })); return false; }
-        if (!phone) { alert(tr({ en: "Please enter a WhatsApp or phone number.", id: "Mohon masukkan nomor WhatsApp atau telepon." })); return false; }
+        const name = $("#step-name", this.container).value.trim().replace(/\s+/g, " ");
+        const email = $("#step-email", this.container).value.trim().toLowerCase();
+        const phoneRaw = $("#step-phone", this.container).value.trim();
+        const phone = this.normalizePhone(phoneRaw);
+        check("step-name", name.length > 1, tr({ en: "Please enter your name.", id: "Mohon isi nama Anda." }));
+        check("step-email", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), tr({ en: "Check the email address, e.g. name@company.com.", id: "Periksa alamat email, contoh: nama@perusahaan.com." }));
+        check("step-phone", phone.replace(/\D/g, "").length >= 8, tr({ en: "Enter a WhatsApp or phone number with at least 8 digits.", id: "Isi nomor WhatsApp atau telepon minimal 8 digit." }));
+        if (firstBad) { $("#" + firstBad, this.container).focus(); return false; }
         this.data.name = name;
         this.data.organization = $("#step-org", this.container).value.trim();
         this.data.email = email;
         this.data.phone = phone;
       } else if (step === 2) {
         const msg = $("#step-message", this.container).value.trim();
-        if (!msg) { alert(tr({ en: "Please include a project brief or message.", id: "Mohon sertakan ringkasan pesan proyek Anda." })); return false; }
+        check("step-message", msg.length > 0, tr({ en: "Add a short brief: artist, date, or what you need.", id: "Tambahkan ringkasan singkat: artis, tanggal, atau kebutuhan Anda." }));
+        if (firstBad) { $("#" + firstBad, this.container).focus(); return false; }
         this.data.date = $("#step-date", this.container).value.trim();
         this.data.venueTier = $("#step-venue", this.container).value;
         this.data.budget = $("#step-budget", this.container).value;
@@ -1066,7 +1098,7 @@
       // Controls visibility
       this.btnBack.style.visibility = this.currentStep > 0 ? "visible" : "hidden";
       this.btnNext.style.display = this.currentStep < this.stepsCount - 1 ? "inline-flex" : "none";
-      this.stepIndicator.textContent = `Step ${this.currentStep + 1} of ${this.stepsCount}`;
+      this.stepIndicator.textContent = tr({ en: `Step ${this.currentStep + 1} of ${this.stepsCount}`, id: `Langkah ${this.currentStep + 1} dari ${this.stepsCount}` });
 
       // Populate review summary on step 4
       if (this.currentStep === 3) {
@@ -1133,21 +1165,24 @@
         submitBtn.disabled = false;
         fb.style.display = "block";
         if (res.ok) {
-          fb.style.background = "rgba(46, 204, 113, 0.15)";
-          fb.style.border = "1px solid #2ecc71";
-          fb.style.color = "#2ecc71";
-          fb.innerHTML = tr({
-            en: "✓ Message sent successfully! Our executive leadership will reply within 24 hours.",
-            id: "✓ Pesan berhasil terkirim! Tim kepemimpinan kami akan membalas dalam 24 jam kerja."
-          });
+          fb.style.display = "none";
+          const body = $(".stepper__body", this.container);
+          body.innerHTML = `<div class="form-done" role="status" tabindex="-1">
+            <div class="form-done__mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+            <h3>${bi("Inquiry sent. Thank you, " + esc(this.data.name.split(" ")[0]) + ".", "Permintaan terkirim. Terima kasih, " + esc(this.data.name.split(" ")[0]) + ".")}</h3>
+            <p>${bi("We reply to " + esc(this.data.email) + " within 24 hours on working days. Need it sooner? Message Admin WithUs on WhatsApp.", "Kami membalas ke " + esc(this.data.email) + " dalam 24 jam pada hari kerja. Butuh lebih cepat? Hubungi Admin WithUs lewat WhatsApp.")}</p>
+            <div class="btns" style="justify-content:center"><a class="btn" href="index.html#events">${bi("See our shows", "Lihat pertunjukan kami")}</a></div>
+          </div>`;
+          const footer = $(".stepper__footer", this.container); if (footer) footer.hidden = true;
+          const done = $(".form-done", body); if (done) done.focus();
         } else {
           // Graceful fallback: encourage immediate WhatsApp connect
           fb.style.background = "rgba(244, 117, 39, 0.15)";
           fb.style.border = "1px solid var(--brand)";
           fb.style.color = "#fff";
           fb.innerHTML = tr({
-            en: "Inquiry recorded! Please click the WhatsApp button above to instantly connect with Admin WithUs on WhatsApp.",
-            id: "Permintaan tercatat! Silakan klik tombol WhatsApp di atas untuk terhubung langsung dengan Admin WithUs di WhatsApp."
+            en: "Your inquiry was not sent. Your details are kept above: tap the WhatsApp button to send them to Admin WithUs, or try again.",
+            id: "Permintaan belum terkirim. Data Anda tetap tersimpan di atas: ketuk tombol WhatsApp untuk mengirimnya ke Admin WithUs, atau coba lagi."
           });
         }
       })
@@ -1159,8 +1194,8 @@
         fb.style.border = "1px solid var(--brand)";
         fb.style.color = "#fff";
         fb.innerHTML = tr({
-          en: "Inquiry drafted! Please tap the WhatsApp button above to send your message directly to Admin WithUs.",
-          id: "Draft permintaan siap! Silakan ketuk tombol WhatsApp di atas untuk mengirim pesan langsung ke Admin WithUs."
+          en: "No connection, so your inquiry was not sent. Tap the WhatsApp button above to send it, or try again when you are online.",
+          id: "Tidak ada koneksi, jadi permintaan belum terkirim. Ketuk tombol WhatsApp di atas untuk mengirimnya, atau coba lagi saat online."
         });
       });
     }
@@ -1390,6 +1425,8 @@
      6. GSAP SCROLL & REVEAL INITIALIZATION
      ========================================================================== */
   function initGSAPAnimations() {
+    // Promoter 101 falls back to a vertical list unless the horizontal pin can run
+    if ($(".h-pin") && (!window.gsap || !window.ScrollTrigger || reduce || window.innerWidth <= 860)) root.classList.add("no-pin");
     if (!window.gsap || reduce) return;
     if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
     root.classList.add("js-anim");
@@ -1462,7 +1499,7 @@
     // Horizontal promoter 101 pin
     const hPin = $(".h-pin");
     const hTrack = $(".h-track");
-    if (hPin && hTrack && window.innerWidth > 860) {
+    if (hPin && hTrack && window.innerWidth > 860 && window.ScrollTrigger) {
       const getScrollDist = () => hTrack.scrollWidth - window.innerWidth;
       gsap.to(hTrack, {
         x: () => -getScrollDist(),
@@ -1575,8 +1612,34 @@
   /* ==========================================================================
      9. INITIALIZATION
      ========================================================================== */
+  function initPrefetch() {
+    const done = new Set();
+    const go = e => {
+      const a = e.target.closest && e.target.closest("a[href]");
+      if (!a || a.target === "_blank" || a.origin !== location.origin || !/\.html$/.test(a.pathname) || a.pathname === location.pathname || done.has(a.pathname)) return;
+      done.add(a.pathname);
+      const l = doc.createElement("link"); l.rel = "prefetch"; l.href = a.pathname; doc.head.appendChild(l);
+    };
+    doc.addEventListener("pointerover", go, { passive: true });
+    doc.addEventListener("touchstart", go, { passive: true });
+    doc.addEventListener("focusin", go);
+  }
+
+  function initReadingProgress() {
+    if (!doc.querySelector(".h-pin")) return; // long-form education page only
+    const bar = doc.createElement("div");
+    bar.className = "read-progress"; bar.setAttribute("aria-hidden", "true");
+    doc.body.appendChild(bar);
+    let t = 0;
+    const upd = () => { t = 0; const max = doc.documentElement.scrollHeight - innerHeight; bar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, scrollY / max) : 0).toFixed(3) + ")"; };
+    addEventListener("scroll", () => { if (!t) t = requestAnimationFrame(upd); }, { passive: true });
+    upd();
+  }
+
   function start() {
     initHeaderAndMenu();
+    initPrefetch();
+    initReadingProgress();
     initFooter();
 
     // Initialize Circular Carousel if on page with #ring-carousel
@@ -1585,8 +1648,8 @@
       window.CIRCULAR_CAROUSEL = new CircularCarousel(carouselEl, {
         preset: "cylinder",
         intro: "rise",
-        cardWidth: 260,
-        aspectRatio: 1,
+        cardWidth: window.innerWidth >= 1100 ? 300 : 260,
+        aspectRatio: 0.78,
         speed: 14,
         captions: true,
         tilt: -5,
