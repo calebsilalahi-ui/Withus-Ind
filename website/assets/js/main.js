@@ -941,7 +941,7 @@
             <div class="step-content">
               <div>
                 <h3 style="font-size:1.4rem;margin-bottom:6px">${bi("Review & Dispatch Inquiry", "Tinjau & Kirim Permintaan")}</h3>
-                <p style="color:var(--muted);font-size:0.95rem">${bi("Review your details below. We reply within 24 hours.", "Periksa ringkasan di bawah ini. Kami membalas dalam 24 jam kerja.")}</p>
+                <p style="color:var(--muted);font-size:0.95rem">${bi("Review your details below. We reply within 1-2 business days.", "Periksa ringkasan di bawah ini. Kami membalas dalam 1-2 hari kerja.")}</p>
               </div>
               <div class="summary-box" id="step-summary">
                 <!-- Dynamically populated -->
@@ -956,6 +956,7 @@
                   <span>${bi("Direct VIP Chat with Admin WithUs (+62 817-0288-258)", "Chat VIP Langsung dengan Admin WithUs (+62 817-0288-258)")}</span>
                 </a>
               </div>
+              <p class="form-consent">${bi('By sending this form, you agree to our <a href="privacy-policy.html">Privacy Policy</a>.', 'Dengan mengirimkan formulir ini, Anda menyetujui <a href="privacy-policy.html">Kebijakan Privasi</a> kami.')}</p>
               <div id="form-feedback" role="alert" style="display:none;padding:14px;border-radius:12px;margin-top:12px"></div>
             </div>
           </div>
@@ -1175,7 +1176,7 @@
           body.innerHTML = `<div class="form-done" role="status" tabindex="-1">
             <div class="form-done__mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
             <h3>${bi("Inquiry sent. Thank you, " + esc(this.data.name.split(" ")[0]) + ".", "Permintaan terkirim. Terima kasih, " + esc(this.data.name.split(" ")[0]) + ".")}</h3>
-            <p>${bi("We reply to " + esc(this.data.email) + " within 24 hours on working days. Need it sooner? Message Admin WithUs on WhatsApp.", "Kami membalas ke " + esc(this.data.email) + " dalam 24 jam pada hari kerja. Butuh lebih cepat? Hubungi Admin WithUs lewat WhatsApp.")}</p>
+            <p>${bi("We reply to " + esc(this.data.email) + " within 1-2 business days. Need it sooner? Message Admin WithUs on WhatsApp.", "Kami membalas ke " + esc(this.data.email) + " dalam 1-2 hari kerja. Butuh lebih cepat? Hubungi Admin WithUs lewat WhatsApp.")}</p>
             <div class="btns" style="justify-content:center"><a class="btn" href="index.html#events">${bi("See our shows", "Lihat pertunjukan kami")}</a></div>
           </div>`;
           const footer = $(".stepper__footer", this.container); if (footer) footer.hidden = true;

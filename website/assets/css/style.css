@@ -2299,3 +2299,5 @@ details > p, .faq-accordion-wrap p { max-width: 68ch; }
 }
 .source-card * { font-size: .875rem; }
 .stepper__footer span { font-size: .875rem; }
+.form-consent { margin-top: 12px; font-size: .875rem; color: var(--muted); text-align: center; }
+.form-consent a { color: var(--text); text-decoration: underline; text-underline-offset: .2em; }
