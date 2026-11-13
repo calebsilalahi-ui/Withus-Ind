@@ -2196,3 +2196,55 @@ html[data-lang="en"] [lang="id"], html[data-lang="id"] [lang="en"] { display: no
 .input-grid { align-items: start; }
 .field-group input, .field-group select { height: 52px; }
 .pphase { display: block; margin: 10px 0 2px; font: 600 .74rem/1.3 var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--subtle); }
+/* Official accounts (contact) */
+.official-accounts { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.official-accounts a { display: grid; grid-template-columns: 20px 1fr; column-gap: 12px; align-items: center; min-height: 56px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; text-decoration: none; color: var(--text); transition: border-color .15s, background .15s; }
+.official-accounts a:hover { border-color: var(--brand); background: var(--glass-accent); }
+.official-accounts svg { grid-row: span 2; color: var(--brand); }
+.oa-name { font-weight: 600; font-size: .95rem; line-height: 1.2; }
+.oa-handle { color: var(--muted); font-size: .85rem; line-height: 1.3; }
+@media (max-width: 420px) { .official-accounts { grid-template-columns: 1fr; } }
+.site-footer .socials { flex-wrap: wrap; }
+
+/* ==========================================================================
+   TYPOGRAPHY PASS: minimum sizes, readable measure, rhythm
+   ========================================================================== */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.eyebrow { font-size: .8rem; }
+.pstep dt, .pphase { font-size: .78rem; letter-spacing: .12em; }
+.pstep dl { font-size: 1rem; }
+.pstep p, .pstep dd, .muted, .lead { max-width: 68ch; }
+.events-section .muted, .partners-header .muted, .cta-band p { margin-inline: auto; }
+h1 + .lead, h1 + p, .h-intro .lead { margin-top: .9rem; }
+.oa-handle, .foot-copy { font-size: .875rem; }
+/* Promoter 101 vertical layout: same column as the rest of the site */
+.no-pin .h-track { max-width: var(--maxw); margin-inline: auto; padding-inline: max(16px, 4vw); }
+.no-pin .h-intro { padding-top: var(--s7); }
+
+/* ==========================================================================
+   PROMOTER vs AGENCY vs TICKETING: scannable comparison matrix
+   ========================================================================== */
+.cmp-lead { margin-top: .6rem; }
+.cmp-wrap { margin-top: var(--s6); }
+.cmp { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.cmp-corner { width: 18%; }
+.cmp th, .cmp td { text-align: left; vertical-align: top; padding: 18px 20px; }
+.cmp thead th { padding-bottom: 20px; border-bottom: 2px solid var(--brand); }
+.cmp-name { display: block; font: 700 1.2rem/1.2 var(--f-head); color: var(--text); }
+.cmp-tag { display: block; margin-top: 4px; font-size: .9rem; color: var(--muted); font-weight: 500; }
+.cmp-row { font: 600 .8rem/1.4 var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--brand); }
+.cmp-cell { font-size: 1rem; line-height: 1.5; color: var(--text); }
+.cmp tbody tr + tr > * { border-top: 1px solid var(--line); }
+.cmp tbody tr:hover > * { background: rgba(255, 255, 255, .03); }
+.cmp-m-label { display: none; }
+/* Phones: one card per row topic, each party on its own labelled line */
+@media (max-width: 760px) {
+  .cmp, .cmp tbody, .cmp tr, .cmp th, .cmp td { display: block; width: auto; }
+  .cmp thead { display: none; }
+  .cmp tbody tr { border: 1px solid var(--line); border-radius: 16px; padding: 4px 0; margin-bottom: 12px; background: var(--glass); }
+  .cmp tbody tr + tr > * { border-top: 0; }
+  .cmp-row { padding: 14px 16px 6px; }
+  .cmp-cell { padding: 8px 16px 12px; }
+  .cmp-cell + .cmp-cell { border-top: 1px solid var(--line) !important; }
+  .cmp-m-label { display: block; font: 700 .95rem/1.3 var(--f-head); margin-bottom: 2px; }
+}

@@ -64,8 +64,13 @@
   ];
 
   const SOCIAL_ITEMS = [
-    { label: "Instagram", url: "https://instagram.com/withusind" },
-    { label: "Admin WithUs", url: "https://wa.me/628170288258?text=Hello%20Admin%20WithUs" },
+    { label: "Instagram", url: "https://www.instagram.com/withusind/" },
+    { label: "X", url: "https://x.com/withusind" },
+    { label: "Threads", url: "https://www.threads.com/@withusind" },
+    { label: "TikTok", url: "https://www.tiktok.com/@withusindonesia" },
+    { label: "LinkedIn", url: "https://www.linkedin.com/company/withusind/" },
+    { label: "YouTube", url: "https://www.youtube.com/@withusind" },
+    { label: "WhatsApp", url: "https://wa.me/628170288258?text=Hello%20Admin%20WithUs" },
     { label: "Email", url: "mailto:admin@withusindonesia.com" }
   ];
 
@@ -1576,17 +1581,26 @@
             <h4 class="foot-heading">${bi("Official Channels", "Kanal Resmi")}</h4>
             <p class="foot-desc">${bi("Connect directly with our Jakarta executive team.", "Terhubung langsung dengan tim eksekutif kami di Jakarta.")}</p>
             <div class="socials">
-              <a href="https://instagram.com/withusind" target="_blank" rel="noopener" aria-label="WithUs Instagram">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              <a href="https://www.instagram.com/withusind/" target="_blank" rel="noopener" aria-label="WithUs on Instagram">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".8" fill="currentColor"/></svg>
+              </a>
+              <a href="https://x.com/withusind" target="_blank" rel="noopener" aria-label="WithUs on X">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg>
+              </a>
+              <a href="https://www.threads.com/@withusind" target="_blank" rel="noopener" aria-label="WithUs on Threads">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 11.2c-.4-2.7-2.1-4.2-4.6-4.2-3 0-4.9 2.2-4.9 5.1s1.9 5 5 5c2.4 0 4.2-1.3 4.2-3.3 0-1.8-1.4-2.9-3.6-2.9-1.9 0-3 .9-3 2.1 0 1.1 1 1.9 2.3 1.9 2.4 0 3.4-2 3.4-5.1"/><path d="M12 21c-5 0-9-3.6-9-9s4-9 9-9c4.2 0 7.4 2.4 8.5 6"/></svg>
+              </a>
+              <a href="https://www.tiktok.com/@withusindonesia" target="_blank" rel="noopener" aria-label="WithUs on TikTok">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.3 2.6 2.1 4.3 4.5 4.5"/></svg>
+              </a>
+              <a href="https://www.linkedin.com/company/withusind/" target="_blank" rel="noopener" aria-label="WithUs on LinkedIn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10.5V17M8 7.2v.1M12 17v-6.5M12 13.2c0-1.7 1-2.7 2.3-2.7S16.5 11.4 16.5 13v4"/></svg>
+              </a>
+              <a href="https://www.youtube.com/@withusind" target="_blank" rel="noopener" aria-label="WithUs on YouTube">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10.2 9.4v5.2l4.4-2.6z" fill="currentColor"/></svg>
               </a>
               <a href="https://wa.me/628170288258?text=Hello%20Admin%20WithUs" target="_blank" rel="noopener" aria-label="Admin WithUs WhatsApp">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
-              </a>
-              <a href="https://linkedin.com/company/withusindonesia" target="_blank" rel="noopener" aria-label="WithUs LinkedIn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-              </a>
-              <a href="https://youtube.com/@withusindonesia" target="_blank" rel="noopener" aria-label="WithUs YouTube">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
               </a>
               <a href="mailto:admin@withusindonesia.com" aria-label="Email WithUs">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
