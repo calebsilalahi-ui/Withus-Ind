@@ -33,3 +33,17 @@ Semua tanda **[ISI]** dan **[VERIFIKASI]** tampil oranye bergaris di halaman; ca
 - Carousel Home adalah ring 3D: irisan vertikal membentuk kartu melengkung. Jika event kurang dari 6, event diulang agar ring penuh. Tambah event di `events.js` dan ring menyesuaikan
 - Statistik Home hanya memuat angka yang terverifikasi (20+ tahun tim, 3 pertunjukan 2026); tambah angka lain setelah diverifikasi
 - Salin email, ikon sosial, dan link Instagram memakai SVG bawaan (tanpa library). Komponen shadcn/skiper tidak dipakai karena situs ini statis tanpa build
+
+## Deploy dan update (untuk klien dan tim web)
+**Deploy hanya folder `website/`.** Folder lain di repo (`.claude`, `.agents`, `scripts`, `CLAUDE.md`) adalah alat internal dan tidak boleh ikut tayang.
+
+Cara paling aman dan paling mudah diperbarui: hubungkan repo ke Cloudflare Pages atau Netlify, atur *root directory* = `website`, *build command* kosong. Setelah itu setiap `git push` ke branch utama otomatis tayang dalam sekitar satu menit; setiap branch mendapat link preview sendiri; versi lama bisa di-rollback dengan satu klik.
+Tanpa Git: unggah ulang isi `website/` (Netlify Drop) atau ganti hanya file yang berubah lewat File Manager/FTP (cPanel). Selalu ganti angka `?v=` pada tag CSS/JS di semua halaman agar browser pengunjung memuat versi baru.
+
+## Keamanan dan privasi (sudah dipasang)
+- Semua skrip dan font disajikan dari situs sendiri (GSAP dan font ada di `assets/vendor`, `assets/fonts`). Tidak ada permintaan ke pihak ketiga saat halaman dibuka.
+- `_headers` (Netlify/Cloudflare Pages) dan `.htaccess` (Apache/cPanel) memasang CSP, HSTS, anti-clickjacking, nosniff, Referrer-Policy, dan Permissions-Policy. Setiap halaman juga memuat CSP lewat `<meta>` sebagai cadangan (GitHub Pages tidak bisa mengatur header).
+- Banner cookie (`assets/js/consent.js`): data esensial (pilihan bahasa dan catatan persetujuan) selalu aktif; analytics baru dimuat setelah pengunjung mengizinkan. Untuk mengaktifkan GA4 isi `GA4_ID` di `consent.js`. Pengunjung bisa mengubah pilihan lewat "Cookie settings" di footer.
+- Form kontak meminta centang persetujuan sebelum data dipakai; tanggal persetujuan ikut tertulis di pesan WhatsApp.
+- `.well-known/security.txt` memuat kontak untuk laporan celah keamanan. Perbarui tanggal `Expires` setiap tahun.
+- Setelah tayang, uji di securityheaders.com dan observatory.mozilla.org.

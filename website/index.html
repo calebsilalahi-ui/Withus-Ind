@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; img-src 'self' data: https://*.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; manifest-src 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
 <title data-titleen="WithUs Indonesia | Bridging Global Creative Vision with Indonesian Entertainment" data-titleid="WithUs Indonesia | Menjembatani Visi Kreatif Global dengan Industri Hiburan Indonesia">WithUs Indonesia | Bridging Global Creative Vision with Indonesian Entertainment</title>
 <meta name="description" content="WithUs Indonesia is a Jakarta-based entertainment company connecting global talent and premium IP with Indonesia through artist management, IP development, and live event production." data-descen="WithUs Indonesia is a Jakarta-based entertainment company connecting global talent and premium IP with Indonesia through artist management, IP development, and live event production." data-descid="WithUs Indonesia adalah perusahaan hiburan di Jakarta yang menghubungkan talenta global dan IP premium dengan Indonesia melalui manajemen artis, pengembangan IP, dan produksi event.">
 <link rel="canonical" href="https://www.withusindonesia.com/">
@@ -14,9 +17,9 @@
 <meta property="og:image:alt" content="WithUs Indonesia: Bridging Global Creative Vision with Indonesian Entertainment">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://www.withusindonesia.com/assets/img/og-image.jpg">
 <meta name="theme-color" content="#070709">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="preload" href="assets/fonts/outfit-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/style.css?v=20261114">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "WithUs Indonesia", "legalName": "PT Harpa Ananta Sora", "url": "https://www.withusindonesia.com", "email": "admin@withusindonesia.com", "address": {"@type": "PostalAddress", "addressLocality": "Jakarta", "addressCountry": "ID"}, "sameAs": ["https://www.instagram.com/withusind/", "https://x.com/withusind", "https://www.threads.com/@withusind", "https://www.tiktok.com/@withusindonesia", "https://www.linkedin.com/company/withusind/", "https://www.youtube.com/@withusind"]}</script>
 </head>
 <body>
@@ -188,9 +191,10 @@
 </div>
 
 <footer id="site-footer"></footer>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="assets/js/events.js"></script>
-<script src="assets/js/main.js"></script>
+<script src="assets/vendor/gsap.min.js?v=3.12.5"></script>
+<script src="assets/vendor/ScrollTrigger.min.js?v=3.12.5"></script>
+<script src="assets/js/events.js?v=20261114"></script>
+<script src="assets/js/main.js?v=20261114"></script>
+<script src="assets/js/consent.js?v=20261114"></script>
 </body>
 </html>

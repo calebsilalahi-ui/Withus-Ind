@@ -914,6 +914,11 @@
                   <input type="tel" id="step-phone" autocomplete="tel" inputmode="tel" aria-describedby="step-phone-err" placeholder="+62 / +82 ..." required><p class="field-err" id="step-phone-err" role="alert" hidden></p>
                 </div>
               </div>
+              <div class="consent-check">
+                <input type="checkbox" id="step-consent" aria-describedby="step-consent-err">
+                <label for="step-consent">${bi('I agree that WithUs Indonesia uses my name, email and phone only to reply to this inquiry, and that my message is sent through WhatsApp (Meta). <a href="privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>', 'Saya setuju WithUs Indonesia menggunakan nama, email, dan nomor telepon saya hanya untuk membalas permintaan ini, dan pesan saya dikirim melalui WhatsApp (Meta). <a href="privacy-policy.html" target="_blank" rel="noopener">Kebijakan Privasi</a>')}</label>
+              </div>
+              <p class="field-err" id="step-consent-err" role="alert" hidden></p>
             </div>
           </div>
 
@@ -1011,9 +1016,9 @@
         card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
       });
 
-      ["step-name", "step-email", "step-phone", "step-message"].forEach(id => {
+      ["step-name", "step-email", "step-phone", "step-message", "step-consent"].forEach(id => {
         const el = $("#" + id, this.container);
-        if (el) el.addEventListener("input", () => { if (el.getAttribute("aria-invalid")) this.fieldError(id, ""); });
+        if (el) el.addEventListener(id === "step-consent" ? "change" : "input", () => { if (el.getAttribute("aria-invalid")) this.fieldError(id, ""); });
       });
 
       // Navigation buttons
@@ -1065,7 +1070,9 @@
         check("step-name", name.length > 1, tr({ en: "Please enter your name.", id: "Mohon isi nama Anda." }));
         check("step-email", /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), tr({ en: "Check the email address, e.g. name@company.com.", id: "Periksa alamat email, contoh: nama@perusahaan.com." }));
         check("step-phone", phone.replace(/\D/g, "").length >= 8, tr({ en: "Enter a WhatsApp or phone number with at least 8 digits.", id: "Isi nomor WhatsApp atau telepon minimal 8 digit." }));
+        check("step-consent", $("#step-consent", this.container).checked, tr({ en: "Please tick the box so we can use your details to reply.", id: "Mohon centang kotak persetujuan agar kami dapat menggunakan data Anda untuk membalas." }));
         if (firstBad) { $("#" + firstBad, this.container).focus(); return false; }
+        this.consentAt = new Date().toISOString().slice(0, 10);
         this.data.name = name;
         this.data.organization = $("#step-org", this.container).value.trim();
         this.data.email = email;
@@ -1147,7 +1154,8 @@
           d.date ? "• Timeline: " + d.date : "",
           "• Venue: " + d.venueTier,
           "• Budget: " + d.budget,
-          "• Brief: " + d.message
+          "• Brief: " + d.message,
+          "• Consent: agreed to the Privacy Policy on " + (this.consentAt || "")
         ].filter(Boolean);
         const text = encodeURIComponent(lines.join("\n"));
         waBtn.href = `https://wa.me/628170288258?text=${text}`;
@@ -1566,6 +1574,8 @@
             <a href="${base}privacy-policy.html">${bi("Privacy Policy", "Kebijakan Privasi")}</a>
             <span class="foot-dot">·</span>
             <a href="${base}terms.html">${bi("Terms of Use", "Syarat &amp; Ketentuan")}</a>
+            <span class="foot-dot">·</span>
+            <button type="button" class="foot-linkbtn" data-open-consent>${bi("Cookie settings", "Pengaturan cookie")}</button>
           </div>
         </div>
       </div>
