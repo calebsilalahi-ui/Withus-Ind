@@ -23,7 +23,7 @@ Mengisi event: cukup prompt "Park Ji Hoon: tanggal, venue, cerita per fase, angk
 Semua tanda **[ISI]** dan **[VERIFIKASI]** tampil oranye bergaris di halaman; cari di kode dengan `grep -rn "ISI\|VERIFIKASI" website`.
 - Poster Kim Bum, iKON, dan Park Ji Hoon sudah dipasang (resolusi rendah, ±390px; kirim file resolusi tinggi). Foto event masih placeholder. Perlu izin tertulis agensi/principal
 - Detail 3 event (tanggal, venue, cerita, angka, status past/upcoming)
-- Endpoint Formspree (`contact.html`, `action`), site key Cloudflare Turnstile, ID GA4
+- Formulir kontak kini hanya mengirim lewat WhatsApp (tidak ada Formspree); site key Turnstile tidak lagi diperlukan; ID GA4
 - WhatsApp, URL sosial media resmi (X, FB, Threads, TikTok, LinkedIn, YouTube)
 - `assets/img/og-image.jpg` sudah ada (1200x630, 44 KB); uji dengan Facebook Sharing Debugger setelah tayang
 - Klaim FAQ (imigrasi, asuransi, GOERS), KBLI, Privacy/Terms ditinjau penasihat hukum

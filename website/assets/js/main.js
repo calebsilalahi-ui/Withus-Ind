@@ -959,24 +959,19 @@
           <div class="stepper__step" data-step-panel="3" style="display:none">
             <div class="step-content">
               <div>
-                <h3 style="font-size:1.4rem;margin-bottom:6px">${bi("Review & Dispatch Inquiry", "Tinjau & Kirim Permintaan")}</h3>
-                <p style="color:var(--muted);font-size:0.95rem">${bi("Review your details below. We reply within 1-2 business days.", "Periksa ringkasan di bawah ini. Kami membalas dalam 1-2 hari kerja.")}</p>
+                <h3 style="font-size:1.4rem;margin-bottom:6px">${bi("Review and send on WhatsApp", "Tinjau dan kirim lewat WhatsApp")}</h3>
+                <p style="color:var(--muted);font-size:0.95rem">${bi("Check your details below, then send them to Admin WithUs on WhatsApp.", "Periksa data Anda di bawah, lalu kirim ke Admin WithUs lewat WhatsApp.")}</p>
               </div>
               <div class="summary-box" id="step-summary">
                 <!-- Dynamically populated -->
               </div>
               <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
-                <button class="btn primary" id="btn-submit-form" style="width:100%;padding:14px;font-size:1.05rem">
-                  ${bi("Submit Official Inquiry", "Kirim Permintaan Resmi")}
-                </button>
-                <div style="text-align:center;color:var(--subtle);font-size:0.85rem">— ${bi("OR INSTANT DIRECT ROUTING", "ATAU JALUR CEPAT WHATSAPP")} —</div>
-                <a class="wa-vip-cta" id="btn-wa-vip" href="#" target="_blank" rel="noopener" style="justify-content:center;text-decoration:none">
+                <a class="wa-vip-cta wa-send" id="btn-wa-vip" href="#" target="_blank" rel="noopener">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
-                  <span>${bi("Direct VIP Chat with Admin WithUs (+62 817-0288-258)", "Chat VIP Langsung dengan Admin WithUs (+62 817-0288-258)")}</span>
+                  <span>${bi("Send inquiry via WhatsApp", "Kirim permintaan lewat WhatsApp")}</span>
                 </a>
+                <p class="wa-help">${bi("Opens WhatsApp with your details already written. Press send there to reach Admin WithUs (+62 817-0288-258). We reply within 1-2 business days.", "Membuka WhatsApp dengan data Anda yang sudah tertulis. Tekan kirim di sana untuk menghubungi Admin WithUs (+62 817-0288-258). Kami membalas dalam 1-2 hari kerja.")}</p>
               </div>
-              <p class="form-consent">${bi('By sending this form, you agree to our <a href="privacy-policy.html">Privacy Policy</a>.', 'Dengan mengirimkan formulir ini, Anda menyetujui <a href="privacy-policy.html">Kebijakan Privasi</a> kami.')}</p>
-              <div id="form-feedback" role="alert" style="display:none;padding:14px;border-radius:12px;margin-top:12px"></div>
             </div>
           </div>
         </div>
@@ -1042,14 +1037,6 @@
         });
       });
 
-      // Form submission
-      const submitBtn = $("#btn-submit-form", this.container);
-      if (submitBtn) {
-        submitBtn.addEventListener("click", e => {
-          e.preventDefault();
-          this.submitForm();
-        });
-      }
     }
 
     fieldError(id, msg) {
@@ -1150,79 +1137,21 @@
       // Pre-fill WhatsApp link to Admin WithUs (+62 817-0288-258)
       const waBtn = $("#btn-wa-vip", this.container);
       if (waBtn) {
-        const text = encodeURIComponent(
-          `*WITHUS INDONESIA INQUIRY*
-` +
-          `• Scope: ${this.data.scope}
-` +
-          `• Name: ${this.data.name} (${this.data.organization})
-` +
-          `• Email: ${this.data.email}
-` +
-          `• Phone: ${this.data.phone}
-` +
-          `• Timeline: ${this.data.date}
-` +
-          `• Venue: ${this.data.venueTier}
-` +
-          `• Budget: ${this.data.budget}
-` +
-          `• Brief: ${this.data.message}`
-        );
+        const d = this.data;
+        const lines = [
+          "*WITHUS INDONESIA INQUIRY*",
+          "• Scope: " + d.scope,
+          "• Name: " + d.name + (d.organization ? " (" + d.organization + ")" : ""),
+          "• Email: " + d.email,
+          "• Phone: " + d.phone,
+          d.date ? "• Timeline: " + d.date : "",
+          "• Venue: " + d.venueTier,
+          "• Budget: " + d.budget,
+          "• Brief: " + d.message
+        ].filter(Boolean);
+        const text = encodeURIComponent(lines.join("\n"));
         waBtn.href = `https://wa.me/628170288258?text=${text}`;
       }
-    }
-
-    submitForm() {
-      const fb = $("#form-feedback", this.container);
-      const submitBtn = $("#btn-submit-form", this.container);
-      submitBtn.setAttribute("aria-busy", "true");
-      submitBtn.disabled = true;
-
-      // Attempt submit to configured endpoint or store locally
-      fetch("https://formspree.io/f/xvgzeyko", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(this.data)
-      })
-      .then(res => {
-        submitBtn.removeAttribute("aria-busy");
-        submitBtn.disabled = false;
-        fb.style.display = "block";
-        if (res.ok) {
-          fb.style.display = "none";
-          const body = $(".stepper__body", this.container);
-          body.innerHTML = `<div class="form-done" role="status" tabindex="-1">
-            <div class="form-done__mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-            <h3>${bi("Inquiry sent. Thank you, " + esc(this.data.name.split(" ")[0]) + ".", "Permintaan terkirim. Terima kasih, " + esc(this.data.name.split(" ")[0]) + ".")}</h3>
-            <p>${bi("We reply to " + esc(this.data.email) + " within 1-2 business days. Need it sooner? Message Admin WithUs on WhatsApp.", "Kami membalas ke " + esc(this.data.email) + " dalam 1-2 hari kerja. Butuh lebih cepat? Hubungi Admin WithUs lewat WhatsApp.")}</p>
-            <div class="btns" style="justify-content:center"><a class="btn" href="index.html#events">${bi("See our shows", "Lihat pertunjukan kami")}</a></div>
-          </div>`;
-          const footer = $(".stepper__footer", this.container); if (footer) footer.hidden = true;
-          const done = $(".form-done", body); if (done) done.focus();
-        } else {
-          // Graceful fallback: encourage immediate WhatsApp connect
-          fb.style.background = "rgba(244, 117, 39, 0.15)";
-          fb.style.border = "1px solid var(--brand)";
-          fb.style.color = "#fff";
-          fb.innerHTML = tr({
-            en: "Your inquiry was not sent. Your details are kept above: tap the WhatsApp button to send them to Admin WithUs, or try again.",
-            id: "Permintaan belum terkirim. Data Anda tetap tersimpan di atas: ketuk tombol WhatsApp untuk mengirimnya ke Admin WithUs, atau coba lagi."
-          });
-        }
-      })
-      .catch(() => {
-        submitBtn.removeAttribute("aria-busy");
-        submitBtn.disabled = false;
-        fb.style.display = "block";
-        fb.style.background = "rgba(244, 117, 39, 0.15)";
-        fb.style.border = "1px solid var(--brand)";
-        fb.style.color = "#fff";
-        fb.innerHTML = tr({
-          en: "No connection, so your inquiry was not sent. Tap the WhatsApp button above to send it, or try again when you are online.",
-          id: "Tidak ada koneksi, jadi permintaan belum terkirim. Ketuk tombol WhatsApp di atas untuk mengirimnya, atau coba lagi saat online."
-        });
-      });
     }
   }
 

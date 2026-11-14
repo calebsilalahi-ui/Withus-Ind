@@ -2299,3 +2299,9 @@ details > p, .faq-accordion-wrap p { max-width: 68ch; }
 .stepper__footer span { font-size: .875rem; }
 .form-consent { margin-top: 12px; font-size: .875rem; color: var(--muted); text-align: center; }
 .form-consent a { color: var(--text); text-decoration: underline; text-underline-offset: .2em; }
+
+/* WhatsApp is the single send action of the inquiry */
+.wa-vip-cta.wa-send { width: 100%; justify-content: center; padding: 1.1em 1.4em; font-size: 1.1rem; text-decoration: none; }
+.wa-vip-cta.wa-send:active { transform: scale(.97); }
+.wa-vip-cta.wa-send:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.wa-help { margin: 0; text-align: center; color: var(--muted); font-size: .9rem; }
